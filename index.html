@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>타임캡슐 · 5년 후의 편지</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy-0: #07071a;
+    --navy-1: #0a0a23;
+    --navy-2: #12123a;
+    --violet: #7c5cff;
+    --violet-bright: #a78bfa;
+    --pink: #ff8ad4;
+    --glow: rgba(124, 92, 255, 0.5);
+    --glass: rgba(255, 255, 255, 0.06);
+    --glass-border: rgba(167, 139, 250, 0.25);
+    --text: #ece9ff;
+    --text-dim: #9b96c9;
+    --serif: 'Nanum Myeongjo', serif;
+    --sans: 'Gowun Dodum', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    background: var(--navy-0);
+    color: var(--text);
+    font-family: var(--sans);
+    overflow: hidden;
+  }
+
+  #app {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    height: 100dvh;
+    margin: 0 auto;
+    overflow: hidden;
+    background:
+      radial-gradient(120% 80% at 50% -10%, #1a1452 0%, transparent 55%),
+      radial-gradient(100% 60% at 50% 110%, #2a1a5e 0%, transparent 50%),
+      var(--navy-0);
+  }
+
+  /* floating stars */
+  .stars { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+  .star {
+    position: absolute; width: 2px; height: 2px; border-radius: 50%;
+    background: #fff; opacity: 0; animation: twinkle var(--dur) ease-in-out infinite;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0; transform: scale(0.5); }
+    50% { opacity: var(--max); transform: scale(1); }
+  }
+
+  .screen {
+    position: absolute; inset: 0; z-index: 1;
+    display: flex; flex-direction: column;
+    padding: 32px 26px calc(32px + env(safe-area-inset-bottom));
+    opacity: 0; pointer-events: none;
+    transform: translateY(18px);
+    transition: opacity .6s ease, transform .6s ease;
+    overflow-y: auto;
+  }
+  .screen.active { opacity: 1; pointer-events: auto; transform: translateY(0); }
+
+  /* ---------- Landing ---------- */
+  #landing { justify-content: center; align-items: center; text-align: center; }
+  .capsule-orb {
+    width: 150px; height: 150px; margin-bottom: 42px; position: relative;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #b9a3ff, var(--violet) 45%, #3a2a8f 80%);
+    box-shadow: 0 0 60px var(--glow), inset 0 0 40px rgba(255,255,255,.25);
+    animation: float 5s ease-in-out infinite;
+  }
+  .capsule-orb::after {
+    content: ''; position: absolute; inset: -16px; border-radius: 50%;
+    border: 1px solid var(--glass-border); animation: pulse-ring 3s ease-out infinite;
+  }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+  @keyframes pulse-ring {
+    0% { transform: scale(.9); opacity: .8; }
+    100% { transform: scale(1.5); opacity: 0; }
+  }
+  .eyebrow {
+    font-size: 13px; letter-spacing: 4px; color: var(--violet-bright);
+    margin-bottom: 20px; text-transform: uppercase;
+  }
+  #landing h1 {
+    font-family: var(--serif); font-weight: 800; font-size: 27px; line-height: 1.5;
+    margin-bottom: 18px; word-break: keep-all;
+  }
+  #landing h1 .accent {
+    background: linear-gradient(120deg, var(--violet-bright), var(--pink));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  #landing .sub {
+    font-size: 15px; color: var(--text-dim); line-height: 1.7;
+    margin-bottom: 48px; word-break: keep-all;
+  }
+
+  .btn {
+    font-family: var(--sans); font-size: 16px; font-weight: 700;
+    color: #fff; border: none; cursor: pointer;
+    padding: 17px 34px; border-radius: 50px; width: 100%; max-width: 320px;
+    background: linear-gradient(120deg, var(--violet), #b86cff 55%, var(--pink));
+    box-shadow: 0 10px 30px var(--glow);
+    transition: transform .25s ease, box-shadow .25s ease;
+    position: relative; overflow: hidden;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn::after {
+    content:''; position:absolute; top:0; left:-60%; width:50%; height:100%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,.45), transparent);
+    transform: skewX(-20deg); animation: sheen 3.2s ease-in-out infinite;
+  }
+  @keyframes sheen { 0%,60%{left:-60%} 100%{left:130%} }
+
+  /* ---------- Question Flow ---------- */
+  .progress-wrap { width: 100%; margin-bottom: 38px; }
+  .progress-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 12px; color: var(--text-dim); margin-bottom: 10px; letter-spacing: 1px;
+  }
+  .progress-track { height: 5px; border-radius: 4px; background: rgba(255,255,255,.08); overflow: hidden; }
+  .progress-fill {
+    height: 100%; width: 0%; border-radius: 4px;
+    background: linear-gradient(90deg, var(--violet), var(--pink));
+    box-shadow: 0 0 12px var(--glow); transition: width .5s ease;
+  }
+  .q-body { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+  .q-num { font-family: var(--serif); font-size: 14px; color: var(--violet-bright); margin-bottom: 14px; letter-spacing: 2px; }
+  .q-text {
+    font-family: var(--serif); font-weight: 700; font-size: 23px; line-height: 1.55;
+    margin-bottom: 34px; word-break: keep-all; min-height: 72px;
+  }
+  .options { display: flex; flex-direction: column; gap: 13px; }
+  .option {
+    text-align: left; font-family: var(--sans); font-size: 15.5px; color: var(--text);
+    padding: 18px 20px; border-radius: 18px; cursor: pointer;
+    background: var(--glass); border: 1px solid rgba(255,255,255,.08);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    transition: transform .2s ease, border-color .2s ease, background .2s ease;
+    display: flex; align-items: center; gap: 14px; word-break: keep-all;
+  }
+  .option .dot {
+    width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+    border: 1.5px solid var(--glass-border); transition: all .2s ease;
+  }
+  .option:active { transform: scale(.98); }
+  .option.chosen {
+    border-color: var(--violet-bright);
+    background: rgba(124,92,255,.16);
+    box-shadow: 0 0 22px rgba(124,92,255,.3);
+  }
+  .option.chosen .dot { background: var(--violet-bright); box-shadow: 0 0 12px var(--violet-bright); }
+
+  /* ---------- Fate Number ---------- */
+  #fate { justify-content: flex-start; }
+  #fate > .btn, #mbti > .btn { align-self: center; }
+  .fate-head { text-align: center; margin: 14px 0 8px; }
+  .fate-head h2 { font-family: var(--serif); font-weight: 700; font-size: 24px; margin-bottom: 14px; }
+  .fate-head p { font-size: 14px; color: var(--text-dim); line-height: 1.7; word-break: keep-all; }
+  .num-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 11px;
+    margin: 32px 0; flex: 1; align-content: center;
+  }
+  .num {
+    aspect-ratio: 1; border-radius: 14px; cursor: pointer;
+    background: var(--glass); border: 1px solid rgba(255,255,255,.08);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--serif); font-size: 17px; color: var(--text-dim);
+    backdrop-filter: blur(8px); transition: all .2s ease;
+  }
+  .num:active { transform: scale(.9); }
+  .num.chosen {
+    color: #fff; border-color: var(--violet-bright);
+    background: linear-gradient(135deg, var(--violet), var(--pink));
+    box-shadow: 0 0 20px var(--glow); transform: scale(1.06);
+  }
+
+  /* ---------- Loading ---------- */
+  #loading { justify-content: center; align-items: center; text-align: center; }
+  .loader-orb {
+    width: 130px; height: 130px; position: relative; margin-bottom: 44px;
+  }
+  .loader-orb .ring {
+    position: absolute; inset: 0; border-radius: 50%;
+    border: 2px solid transparent; border-top-color: var(--violet-bright);
+    animation: spin 1.3s linear infinite;
+  }
+  .loader-orb .ring:nth-child(2) { inset: 14px; border-top-color: var(--pink); animation-duration: 1.8s; animation-direction: reverse; }
+  .loader-orb .ring:nth-child(3) { inset: 28px; border-top-color: #fff; animation-duration: 2.2s; }
+  .loader-orb .core {
+    position: absolute; inset: 42px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #d9ccff, var(--violet));
+    box-shadow: 0 0 40px var(--glow); animation: float 2.6s ease-in-out infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #loading .load-text { font-family: var(--serif); font-size: 18px; line-height: 1.6; margin-bottom: 26px; word-break: keep-all; }
+  .load-bar { width: 220px; height: 4px; border-radius: 4px; background: rgba(255,255,255,.1); overflow: hidden; }
+  .load-bar span { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, var(--violet), var(--pink)); box-shadow: 0 0 12px var(--glow); }
+
+  /* ---------- Result ---------- */
+  #result { padding-top: 28px; }
+  .reveal { opacity: 0; transform: translateY(26px); transition: opacity .9s ease, transform .9s ease; margin-bottom: 22px; }
+  .reveal.show { opacity: 1; transform: translateY(0); }
+  .card {
+    background: var(--glass); border: 1px solid var(--glass-border);
+    border-radius: 22px; padding: 26px 24px;
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 14px 40px rgba(0,0,0,.35);
+  }
+  .card-label {
+    font-size: 11px; letter-spacing: 3px; color: var(--violet-bright);
+    text-transform: uppercase; margin-bottom: 16px;
+  }
+  .letter-card { position: relative; overflow: hidden; }
+  .letter-card::before {
+    content:''; position:absolute; top:-40px; right:-40px; width:140px; height:140px;
+    background: radial-gradient(circle, var(--glow), transparent 70%); pointer-events:none;
+  }
+  .letter-text {
+    font-family: var(--serif); font-size: 16.5px; line-height: 2; white-space: pre-wrap;
+    min-height: 180px; word-break: keep-all;
+  }
+  .letter-text .cursor { display: inline-block; width: 2px; background: var(--violet-bright); animation: blink 1s steps(2) infinite; vertical-align: text-bottom; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .portrait-card { text-align: center; }
+  .portrait-frame {
+    width: 180px; height: 220px; margin: 0 auto 22px; border-radius: 18px;
+    position: relative; overflow: hidden;
+    background: linear-gradient(160deg, #2a2360, #1a1442);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 0 36px rgba(124,92,255,.35), inset 0 0 30px rgba(0,0,0,.4);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .portrait-frame .silhouette { font-size: 90px; filter: drop-shadow(0 0 18px var(--glow)); animation: float 4s ease-in-out infinite; }
+  .portrait-frame img.real {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; opacity: 0; transition: opacity 1.2s ease;
+  }
+  .portrait-frame img.real.loaded { opacity: 1; }
+  .portrait-frame.has-photo .silhouette { display: none; }
+  .portrait-frame .scan {
+    position: absolute; left: 0; right: 0; height: 40%;
+    background: linear-gradient(180deg, transparent, rgba(167,139,250,.25), transparent);
+    animation: scanmove 2.6s ease-in-out infinite;
+  }
+  @keyframes scanmove { 0%,100%{ top:-40%; } 50%{ top:100%; } }
+  .portrait-card h3 { font-family: var(--serif); font-weight: 700; font-size: 19px; margin-bottom: 8px; word-break: keep-all; }
+  .portrait-card .tag { font-size: 13px; color: var(--text-dim); }
+
+  .trait-row { display: flex; flex-direction: column; gap: 18px; }
+  .trait { }
+  .trait .t-key { font-size: 12px; color: var(--violet-bright); letter-spacing: 1px; margin-bottom: 6px; }
+  .trait .t-val { font-family: var(--serif); font-size: 16px; line-height: 1.6; word-break: keep-all; }
+  .charm-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .chip { font-size: 13px; padding: 7px 14px; border-radius: 30px; background: rgba(124,92,255,.16); border: 1px solid var(--glass-border); color: var(--text); }
+
+  .place-card { text-align: center; }
+  .place-icon { font-size: 46px; margin-bottom: 14px; filter: drop-shadow(0 0 14px var(--glow)); }
+  .place-card h3 { font-family: var(--serif); font-weight: 700; font-size: 20px; margin-bottom: 10px; }
+  .place-card p { font-size: 14.5px; color: var(--text-dim); line-height: 1.7; word-break: keep-all; }
+
+  .share-zone { margin: 8px 0 20px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .btn.ghost {
+    background: transparent; border: 1px solid var(--glass-border);
+    box-shadow: none; color: var(--violet-bright);
+  }
+  .btn.ghost::after { display: none; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 32px; transform: translateX(-50%) translateY(20px);
+    background: rgba(20,16,52,.95); border: 1px solid var(--glass-border);
+    padding: 13px 22px; border-radius: 30px; font-size: 14px; color: var(--text);
+    opacity: 0; pointer-events: none; transition: all .4s ease; z-index: 50;
+    backdrop-filter: blur(10px); white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  ::-webkit-scrollbar { width: 0; }
+
+  /* MBTI grid */
+  .mbti-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+    margin: 28px 0; flex: 1; align-content: center;
+  }
+  .mbti {
+    aspect-ratio: 1.5; border-radius: 14px; cursor: pointer;
+    background: var(--glass); border: 1px solid rgba(255,255,255,.08);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--serif); font-size: 15px; letter-spacing: 1px; color: var(--text-dim);
+    backdrop-filter: blur(8px); transition: all .2s ease;
+  }
+  .mbti:active { transform: scale(.92); }
+  .mbti.chosen {
+    color: #fff; border-color: var(--violet-bright);
+    background: linear-gradient(135deg, var(--violet), var(--pink));
+    box-shadow: 0 0 18px var(--glow); transform: scale(1.05);
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="stars" id="stars"></div>
+
+  <!-- LANDING -->
+  <section class="screen active" id="landing">
+    <div class="capsule-orb"></div>
+    <div class="eyebrow">TIME CAPSULE</div>
+    <h1>5년 후, 누군가가<br>당신에게 <span class="accent">편지를</span> 보냈습니다.</h1>
+    <p class="sub">당신의 미래 연인은 어떤 얼굴일까요?<br>15개의 질문이 운명을 열어줍니다.</p>
+    <button class="btn" onclick="goMbti()">테스트 시작하기</button>
+  </section>
+
+  <!-- MBTI -->
+  <section class="screen" id="mbti">
+    <div class="fate-head" style="margin-top:8px;">
+      <h2>당신의 MBTI를 선택하세요</h2>
+      <p>당신의 성향이 운명의 상대를 찾는<br>첫 번째 열쇠가 됩니다.</p>
+    </div>
+    <div class="mbti-grid" id="mbti-grid"></div>
+    <button class="btn" id="mbti-btn" onclick="startTest()" style="opacity:.4; pointer-events:none;">다음으로</button>
+  </section>
+
+  <!-- QUESTIONS -->
+  <section class="screen" id="questions">
+    <div class="progress-wrap">
+      <div class="progress-meta">
+        <span id="q-counter">질문 1 / 15</span>
+        <span id="q-pct">0%</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="q-fill"></div></div>
+    </div>
+    <div class="q-body">
+      <div class="q-num" id="q-num">QUESTION 01</div>
+      <div class="q-text" id="q-text"></div>
+      <div class="options" id="q-options"></div>
+    </div>
+  </section>
+
+  <!-- FATE NUMBER -->
+  <section class="screen" id="fate">
+    <div class="fate-head">
+      <h2>직감대로 숫자를 선택하세요</h2>
+      <p>1부터 30 사이 숫자 하나를 골라주세요.<br>이 숫자는 당신의 미래와 연결된 작은 변수입니다.</p>
+    </div>
+    <div class="num-grid" id="num-grid"></div>
+    <button class="btn" id="fate-btn" onclick="goLoading()" style="opacity:.4; pointer-events:none;">운명 확인하기</button>
+  </section>
+
+  <!-- LOADING -->
+  <section class="screen" id="loading">
+    <div class="loader-orb">
+      <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+      <div class="core"></div>
+    </div>
+    <div class="load-text">5년 후의 타임캡슐을<br>열고 있습니다...</div>
+    <div class="load-bar"><span id="load-fill"></span></div>
+  </section>
+
+  <!-- RESULT -->
+  <section class="screen" id="result">
+    <div class="reveal" id="r-letter">
+      <div class="card letter-card">
+        <div class="card-label">A Letter From 2031</div>
+        <div class="letter-text" id="letter-text"></div>
+      </div>
+    </div>
+
+    <div class="reveal" id="r-portrait">
+      <div class="card portrait-card">
+        <div class="card-label">당신의 운명은 이런 얼굴입니다</div>
+        <div class="portrait-frame" id="portrait-frame">
+          <img class="real" id="portrait-img" alt="future partner portrait">
+          <div class="scan"></div>
+          <div class="silhouette" id="portrait-emoji">🌙</div>
+        </div>
+        <h3 id="portrait-name"></h3>
+        <div class="tag" id="portrait-tag"></div>
+      </div>
+    </div>
+
+    <div class="reveal" id="r-personality">
+      <div class="card">
+        <div class="card-label">Personality Analysis</div>
+        <div class="trait-row">
+          <div class="trait"><div class="t-key">성격</div><div class="t-val" id="t-personality"></div></div>
+          <div class="trait"><div class="t-key">연애 스타일</div><div class="t-val" id="t-dating"></div></div>
+          <div class="trait"><div class="t-key">매력 포인트</div><div class="charm-chips" id="t-charm"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal" id="r-place">
+      <div class="card place-card">
+        <div class="card-label">First Meeting</div>
+        <div class="place-icon" id="place-icon">☕</div>
+        <h3 id="place-name"></h3>
+        <p id="place-desc"></p>
+      </div>
+    </div>
+
+    <div class="reveal show share-zone">
+      <button class="btn" onclick="shareResult()">결과 공유하기</button>
+      <button class="btn ghost" onclick="restart()">다시 테스트하기</button>
+    </div>
+  </section>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+/* ============ DATA ============ */
+const QUESTIONS = [
+  { q: "주말 저녁, 가장 당신다운 모습은?", opts: ["집에서 영화 보며 쉬기","친구들과 활기찬 모임","새로운 곳으로 즉흥 여행","조용한 카페에서 사색"] },
+  { q: "연인에게 가장 바라는 것은?", opts: ["깊은 정서적 교감","함께하는 즐거운 모험","변함없는 안정감","서로의 성장 응원"] },
+  { q: "첫인상에서 가장 끌리는 부분은?", opts: ["따뜻한 눈빛과 미소","유머와 대화 센스","차분하고 지적인 분위기","자신감 있는 태도"] },
+  { q: "갈등이 생겼을 때 당신은?", opts: ["바로 대화로 풀어낸다","시간을 갖고 생각한다","상대 입장을 먼저 본다","유머로 분위기를 바꾼다"] },
+  { q: "이상적인 데이트 장소는?", opts: ["분위기 좋은 레스토랑","바다나 산, 자연 속","전시회나 공연장","집에서 함께 요리"] },
+  { q: "당신의 사랑 표현 방식은?", opts: ["다정한 말과 표현","함께하는 시간","작은 선물과 이벤트","행동으로 챙겨주기"] },
+  { q: "연애에서 가장 중요한 가치는?", opts: ["신뢰","설렘","존중","솔직함"] },
+  { q: "스트레스를 푸는 방법은?", opts: ["혼자만의 시간","사람들과 수다","운동이나 활동","취미에 몰입"] },
+  { q: "미래를 그릴 때 당신은?", opts: ["구체적으로 계획한다","흐름에 맡긴다","함께 만들어간다","꿈을 크게 꾼다"] },
+  { q: "어떤 대화를 가장 좋아하나요?", opts: ["깊고 진솔한 이야기","웃기고 가벼운 수다","지적인 토론","일상의 소소한 공유"] },
+  { q: "여행을 간다면 당신은?", opts: ["계획을 꼼꼼히 세운다","즉흥적으로 떠난다","현지인처럼 머문다","유명 명소 위주로"] },
+  { q: "연인의 어떤 모습에 반하나요?", opts: ["몰입하는 진지한 모습","해맑게 웃는 모습","나를 배려하는 모습","열정적인 모습"] },
+  { q: "당신이 사랑에 빠지는 순간은?", opts: ["마음이 통할 때","함께 웃을 때","편안함을 느낄 때","존중받는다고 느낄 때"] },
+  { q: "이상형의 라이프스타일은?", opts: ["안정적이고 차분한","활동적이고 도전적인","창의적이고 자유로운","성실하고 계획적인"] },
+  { q: "5년 후 당신이 바라는 관계는?", opts: ["서로의 가장 친한 친구","여전히 설레는 사이","함께 성장하는 동반자","편안한 안식처 같은"] },
+];
+
+/* ───────────────────────────────────────────────
+   얼굴형 24종.  각 항목에 사진을 넣으려면 img 경로를 채우세요.
+   예: img:"images/face01.jpg"  ← 파일이 없으면 자동으로 이모지로 표시됩니다.
+   지금은 전부 이모지로 작동하고, 나중에 사진을 하나씩 갈아끼우면 됩니다.
+─────────────────────────────────────────────── */
+const FACES = [
+  { emoji:"🌙", img:"images/face01.jpg", name:"달빛을 닮은 사람", tag:"고요하지만 깊은 눈을 가진" },
+  { emoji:"☀️", img:"images/face02.jpg", name:"햇살 같은 사람", tag:"곁에 있으면 밝아지는" },
+  { emoji:"🌊", img:"images/face03.jpg", name:"바다를 닮은 사람", tag:"넓고 자유로운 마음의" },
+  { emoji:"🔥", img:"images/face04.jpg", name:"별처럼 빛나는 사람", tag:"열정으로 가득한" },
+  { emoji:"🌿", img:"images/face05.jpg", name:"숲처럼 편안한 사람", tag:"곁에 있으면 안심되는" },
+  { emoji:"❄️", img:"images/face06.jpg", name:"첫눈 같은 사람", tag:"맑고 시린 분위기의" },
+  { emoji:"🌸", img:"images/face07.jpg", name:"봄을 닮은 사람", tag:"보드랍고 설레는" },
+  { emoji:"🍃", img:"images/face08.jpg", name:"바람 같은 사람", tag:"자유롭고 산뜻한" },
+  { emoji:"⭐", img:"images/face09.jpg", name:"새벽별 같은 사람", tag:"조용히 빛나는" },
+  { emoji:"🌹", img:"images/face10.jpg", name:"장미를 닮은 사람", tag:"우아하고 강렬한" },
+  { emoji:"🌻", img:"images/face11.jpg", name:"해바라기 같은 사람", tag:"한결같이 따뜻한" },
+  { emoji:"🌧️", img:"images/face12.jpg", name:"비를 닮은 사람", tag:"감성적이고 깊은" },
+  { emoji:"🦋", img:"images/face13.jpg", name:"나비 같은 사람", tag:"가볍고 신비로운" },
+  { emoji:"🌺", img:"images/face14.jpg", name:"노을을 닮은 사람", tag:"따뜻하고 화사한" },
+  { emoji:"💎", img:"images/face15.jpg", name:"보석 같은 사람", tag:"또렷하고 단단한" },
+  { emoji:"🌌", img:"images/face16.jpg", name:"은하수 같은 사람", tag:"넓고 신비로운" },
+  { emoji:"🍂", img:"images/face17.jpg", name:"가을을 닮은 사람", tag:"차분하고 성숙한" },
+  { emoji:"☕", img:"images/face18.jpg", name:"커피 같은 사람", tag:"진하고 편안한" },
+  { emoji:"🌷", img:"images/face19.jpg", name:"튤립 같은 사람", tag:"단정하고 사랑스러운" },
+  { emoji:"🎐", img:"images/face20.jpg", name:"여름밤 같은 사람", tag:"시원하고 다정한" },
+  { emoji:"🕊️", img:"images/face21.jpg", name:"새벽 같은 사람", tag:"맑고 평온한" },
+  { emoji:"🔮", img:"images/face22.jpg", name:"수정 같은 사람", tag:"신비롭고 깊은" },
+  { emoji:"🌙", img:"images/face23.jpg", name:"초승달 같은 사람", tag:"은은하고 섬세한" },
+  { emoji:"✨", img:"images/face24.jpg", name:"별빛 같은 사람", tag:"반짝이고 따뜻한" },
+];
+
+/* 성격 풀 8종 (성격 + 연애스타일 + 매력포인트) */
+const TRAITS = [
+  { personality:"겉으론 차분하지만 마음 속엔 따뜻한 우주를 품은 사람. 말보다 행동으로 사랑을 보여줍니다.",
+    dating:"천천히, 그러나 진심으로 다가가는 스타일. 한번 마음을 열면 끝까지 함께합니다.",
+    charm:["깊은 눈빛","경청하는 태도","은은한 다정함"] },
+  { personality:"에너지가 넘치고 긍정적인 사람. 함께 있으면 세상이 환해지는, 타고난 분위기 메이커입니다.",
+    dating:"표현에 거침이 없고 적극적. 사랑을 숨기지 않고 매 순간 설렘을 선물합니다.",
+    charm:["환한 미소","유쾌한 에너지","솔직한 표현"] },
+  { personality:"자유롭고 모험을 사랑하는 영혼. 깊은 곳엔 단단한 다정함이 흐르는 사람입니다.",
+    dating:"함께 새로운 걸 경험하는 걸 좋아하는 스타일. 매일이 작은 여행 같은 연애를 만듭니다.",
+    charm:["여유로운 매력","모험심","포용력"] },
+  { personality:"자신만의 세계가 뚜렷하고 열정적인 사람. 목표를 향해 빛나는 모습이 가장 큰 매력입니다.",
+    dating:"한번 빠지면 깊고 강렬하게. 상대를 향한 마음을 온전히 쏟아내는 스타일입니다.",
+    charm:["뜨거운 진심","당당함","강한 몰입력"] },
+  { personality:"안정감과 다정함을 동시에 주는 사람. 거창하지 않아도 매일을 따뜻하게 채워줍니다.",
+    dating:"꾸준하고 변함없는 사랑. 화려하진 않지만 가장 오래 곁에 남는 사람입니다.",
+    charm:["편안한 분위기","한결같음","세심한 배려"] },
+  { personality:"섬세하고 감수성이 풍부한 사람. 작은 것도 놓치지 않고 마음을 읽어주는 다정함이 있습니다.",
+    dating:"상대의 감정을 먼저 살피는 스타일. 말하지 않아도 알아채는 깊은 공감이 매력입니다.",
+    charm:["섬세한 감수성","공감 능력","따뜻한 배려"] },
+  { personality:"지적이고 호기심 많은 사람. 대화를 나눌수록 빠져드는 깊이를 가졌습니다.",
+    dating:"마음이 통하는 대화로 사랑을 키우는 스타일. 함께 성장하는 관계를 만듭니다.",
+    charm:["지적인 매력","풍부한 대화","호기심"] },
+  { personality:"든든하고 책임감 있는 사람. 곁에 있으면 어떤 일도 함께 헤쳐나갈 수 있을 것 같습니다.",
+    dating:"믿음직하게 곁을 지키는 스타일. 약속을 지키고 끝까지 책임지는 사랑을 합니다.",
+    charm:["듬직함","책임감","변치 않는 신뢰"] },
+];
+
+/* 만남장소 풀 8종 */
+const PLACES = [
+  { icon:"📚", name:"오래된 서점의 한 구석", desc:"비 오는 오후, 같은 책에 손이 닿으며 시작되는 인연. 조용한 책장 사이에서 운명이 눈을 마주칩니다." },
+  { icon:"🎡", name:"노을 지는 한강 공원", desc:"자전거를 타다 우연히 마주친 두 사람. 붉게 물든 하늘 아래, 첫 대화가 밤까지 이어집니다." },
+  { icon:"✈️", name:"여행지의 작은 게스트하우스", desc:"낯선 도시, 같은 테이블에 앉게 된 우연. 별이 쏟아지는 밤하늘 아래 운명이 시작됩니다." },
+  { icon:"🎨", name:"늦은 밤의 전시회 오프닝", desc:"같은 그림 앞에서 멈춘 두 사람. 작품에 대한 짧은 대화가 긴 인연의 시작이 됩니다." },
+  { icon:"☕", name:"동네의 작은 단골 카페", desc:"매일 같은 시간 마주치던 두 사람. 어느 날 건넨 따뜻한 커피 한 잔에서 마음이 열립니다." },
+  { icon:"🎬", name:"심야 영화관의 마지막 회차", desc:"텅 빈 상영관, 나란히 앉게 된 우연. 엔딩 크레딧이 올라갈 때 시작되는 이야기가 있습니다." },
+  { icon:"🌧️", name:"비 내리는 버스 정류장", desc:"우산 하나를 나눠 쓰게 된 소나기 오는 저녁. 짧은 거리가 평생의 인연으로 이어집니다." },
+  { icon:"🎵", name:"작은 라이브 공연장", desc:"같은 노래에 마음이 움직인 두 사람. 음악이 끝난 뒤 건넨 한마디가 운명이 됩니다." },
+];
+
+const MBTI_LIST = ["INTJ","INTP","ENTJ","ENTP","INFJ","INFP","ENFJ","ENFP","ISTJ","ISFJ","ESTJ","ESFJ","ISTP","ISFP","ESTP","ESFP"];
+
+const LETTERS = [
+  "안녕. 5년 뒤에서 너에게 편지를 보내.\n\n아직은 서로를 모르지만, 우리는 결국 만나게 될 거야. 네가 지금 어떤 고민을 하고 있든, 그 길의 끝에서 나를 만나게 돼.\n\n조금만 기다려줘. 곧 너를 알아볼게.",
+  "안녕, 미래에서 인사를 건네.\n\n네가 이 편지를 읽는 지금, 나는 이미 너를 그리워하고 있어. 우리가 처음 만난 그 순간을, 나는 평생 잊지 못할 거야.\n\n너는 생각보다 훨씬 사랑받을 사람이야. 그러니 너 자신을 믿어줘.",
+  "5년 후의 내가, 5년 전의 너에게.\n\n우리는 아주 우연히, 그러나 운명처럼 만나게 돼. 그날의 너는 평소와 다를 것 없는 하루를 보내고 있었지.\n\n그 평범한 하루가, 우리에겐 가장 특별한 시작이었어. 기대해도 좋아.",
+];
+
+/* ============ STATE ============ */
+let answers = [], curQ = 0, fateNum = null, myMbti = null;
+
+/* ============ STARS ============ */
+(function makeStars(){
+  const box = document.getElementById('stars');
+  for(let i=0;i<60;i++){
+    const s=document.createElement('div'); s.className='star';
+    s.style.left=Math.random()*100+'%'; s.style.top=Math.random()*100+'%';
+    s.style.setProperty('--dur',(2+Math.random()*3)+'s');
+    s.style.setProperty('--max',(0.3+Math.random()*0.6).toFixed(2));
+    s.style.animationDelay=(Math.random()*4)+'s';
+    box.appendChild(s);
+  }
+})();
+
+/* ============ NAV ============ */
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('app').scrollTop = 0;
+}
+
+function goMbti(){
+  show('mbti');
+  const grid=document.getElementById('mbti-grid');
+  if(grid.children.length===0){
+    MBTI_LIST.forEach(m=>{
+      const el=document.createElement('button');
+      el.className='mbti'; el.textContent=m;
+      el.onclick=()=>pickMbti(m,el);
+      grid.appendChild(el);
+    });
+  }
+}
+function pickMbti(m,el){
+  document.querySelectorAll('#mbti-grid .mbti').forEach(x=>x.classList.remove('chosen'));
+  el.classList.add('chosen'); myMbti=m;
+  const btn=document.getElementById('mbti-btn');
+  btn.style.opacity=1; btn.style.pointerEvents='auto';
+}
+
+function startTest(){ curQ=0; answers=[]; show('questions'); renderQ(); }
+
+function renderQ(){
+  const data = QUESTIONS[curQ];
+  document.getElementById('q-counter').textContent = `질문 ${curQ+1} / 15`;
+  const pct = Math.round((curQ)/15*100);
+  document.getElementById('q-pct').textContent = pct+'%';
+  document.getElementById('q-fill').style.width = pct+'%';
+  document.getElementById('q-num').textContent = 'QUESTION '+String(curQ+1).padStart(2,'0');
+
+  const qt = document.getElementById('q-text');
+  qt.style.opacity=0; qt.style.transform='translateX(16px)';
+  setTimeout(()=>{ qt.textContent=data.q; qt.style.transition='all .45s ease'; qt.style.opacity=1; qt.style.transform='translateX(0)'; },120);
+
+  const box = document.getElementById('q-options');
+  box.innerHTML='';
+  data.opts.forEach((opt,i)=>{
+    const el=document.createElement('button');
+    el.className='option';
+    el.innerHTML=`<span class="dot"></span><span>${opt}</span>`;
+    el.style.opacity=0; el.style.transform='translateY(14px)';
+    el.onclick=()=>chooseOpt(i,el);
+    box.appendChild(el);
+    setTimeout(()=>{ el.style.transition='all .4s ease'; el.style.opacity=1; el.style.transform='translateY(0)'; }, 180+i*70);
+  });
+}
+
+function chooseOpt(i,el){
+  document.querySelectorAll('#q-options .option').forEach(o=>o.classList.remove('chosen'));
+  el.classList.add('chosen');
+  answers[curQ]=i;
+  setTimeout(()=>{
+    if(curQ<14){ curQ++; renderQ(); }
+    else { document.getElementById('q-fill').style.width='100%'; document.getElementById('q-pct').textContent='100%'; goFate(); }
+  }, 380);
+}
+
+/* ============ FATE ============ */
+function goFate(){
+  show('fate');
+  const grid=document.getElementById('num-grid');
+  if(grid.children.length===0){
+    for(let n=1;n<=30;n++){
+      const el=document.createElement('button');
+      el.className='num'; el.textContent=n;
+      el.onclick=()=>pickNum(n,el);
+      grid.appendChild(el);
+    }
+  }
+}
+function pickNum(n,el){
+  document.querySelectorAll('#num-grid .num').forEach(x=>x.classList.remove('chosen'));
+  el.classList.add('chosen'); fateNum=n;
+  const btn=document.getElementById('fate-btn');
+  btn.style.opacity=1; btn.style.pointerEvents='auto';
+}
+
+/* ============ LOADING ============ */
+function goLoading(){
+  show('loading');
+  const fill=document.getElementById('load-fill');
+  fill.style.transition='none'; fill.style.width='0%';
+  requestAnimationFrame(()=>{ fill.style.transition='width 4.9s linear'; fill.style.width='100%'; });
+  setTimeout(showResult, 5000);
+}
+
+/* ============ RESULT ============ */
+function computeResult(){
+  const ansSum = answers.reduce((a,b)=>a+b,0);
+  const mbtiIdx = Math.max(0, MBTI_LIST.indexOf(myMbti)); // 0~15
+  const fate = fateNum || 0;
+
+  // 세 요소를 서로 다른 조합으로 섞어 다양성 확보
+  const faceIdx  = (mbtiIdx*3 + fate*2 + ansSum) % FACES.length;
+  const traitIdx = (mbtiIdx + ansSum*2 + fate) % TRAITS.length;
+  const placeIdx = (fate*3 + ansSum + mbtiIdx) % PLACES.length;
+  const letterIdx = (fate + mbtiIdx) % LETTERS.length;
+
+  const face = FACES[faceIdx];
+  const trait = TRAITS[traitIdx];
+  const place = PLACES[placeIdx];
+
+  // 하나의 결과 객체로 합쳐서 반환 (기존 코드와 호환)
+  const p = {
+    emoji: face.emoji, img: face.img, name: face.name, tag: face.tag,
+    personality: trait.personality, dating: trait.dating, charm: trait.charm,
+    place: place
+  };
+  return { p, letter: LETTERS[letterIdx] };
+}
+
+let typingTimer=null;
+function showResult(){
+  const { p, letter } = computeResult();
+  show('result');
+
+  // fill data
+  document.getElementById('portrait-emoji').textContent = p.emoji;
+  // 사진이 있으면 사진을, 없으면 이모지를 보여줌
+  const frame = document.getElementById('portrait-frame');
+  const imgEl = document.getElementById('portrait-img');
+  frame.classList.remove('has-photo');
+  imgEl.classList.remove('loaded');
+  if (p.img) {
+    imgEl.onload = ()=>{ frame.classList.add('has-photo'); imgEl.classList.add('loaded'); };
+    imgEl.onerror = ()=>{ frame.classList.remove('has-photo'); }; // 파일 없으면 이모지 유지
+    imgEl.src = p.img;
+  } else {
+    imgEl.removeAttribute('src');
+  }
+  document.getElementById('portrait-name').textContent = p.name;
+  document.getElementById('portrait-tag').textContent = p.tag;
+  document.getElementById('t-personality').textContent = p.personality;
+  document.getElementById('t-dating').textContent = p.dating;
+  const charm=document.getElementById('t-charm'); charm.innerHTML='';
+  p.charm.forEach(c=>{ const s=document.createElement('span'); s.className='chip'; s.textContent='#'+c; charm.appendChild(s); });
+  document.getElementById('place-icon').textContent = p.place.icon;
+  document.getElementById('place-name').textContent = p.place.name;
+  document.getElementById('place-desc').textContent = p.place.desc;
+
+  // staged reveal
+  const r=[ 'r-letter','r-portrait','r-personality','r-place' ];
+  document.getElementById('r-letter').classList.add('show');
+  typeLetter(letter);
+
+  setTimeout(()=>document.getElementById('r-portrait').classList.add('show'), 2600);
+  setTimeout(()=>document.getElementById('r-personality').classList.add('show'), 3400);
+  setTimeout(()=>document.getElementById('r-place').classList.add('show'), 4200);
+}
+
+function typeLetter(text){
+  const el=document.getElementById('letter-text');
+  el.innerHTML=''; let i=0;
+  const cursor=document.createElement('span'); cursor.className='cursor'; cursor.innerHTML='&nbsp;';
+  const content=document.createElement('span'); el.appendChild(content); el.appendChild(cursor);
+  clearInterval(typingTimer);
+  typingTimer=setInterval(()=>{
+    if(i<text.length){ content.textContent += text[i]; i++; }
+    else { clearInterval(typingTimer); setTimeout(()=>cursor.remove(),1200); }
+  }, 45);
+}
+
+/* ============ SHARE / RESTART ============ */
+function shareResult(){
+  const { p } = computeResult();
+  const txt = `나의 미래 연인은 '${p.name}' 💜\n타임캡슐에서 5년 후의 편지를 받았어요.\n당신의 운명도 확인해보세요 ✨`;
+  if(navigator.share){
+    navigator.share({ title:'타임캡슐 · 5년 후의 편지', text:txt }).catch(()=>{});
+  } else {
+    navigator.clipboard?.writeText(txt).then(()=>toast('결과가 복사되었어요 💜')).catch(()=>toast('공유 링크를 복사했어요'));
+  }
+}
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+function restart(){
+  answers=[]; curQ=0; fateNum=null; myMbti=null;
+  document.querySelectorAll('.reveal').forEach(r=>{ if(!r.classList.contains('share-zone')) r.classList.remove('show'); });
+  document.getElementById('fate-btn').style.opacity='.4';
+  document.getElementById('fate-btn').style.pointerEvents='none';
+  document.getElementById('mbti-btn').style.opacity='.4';
+  document.getElementById('mbti-btn').style.pointerEvents='none';
+  document.querySelectorAll('#num-grid .num').forEach(x=>x.classList.remove('chosen'));
+  document.querySelectorAll('#mbti-grid .mbti').forEach(x=>x.classList.remove('chosen'));
+  show('landing');
+}
+</script>
+</body>
+</html>
