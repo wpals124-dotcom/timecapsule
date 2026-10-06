@@ -47,7 +47,7 @@ export default function CameraModal({ mission, onClose, onVerify }) {
     ctx.fillRect(0, h - fs * 3.2, w, fs * 3.2)
     ctx.fillStyle = '#fff'
     ctx.font = `700 ${fs}px Pretendard, sans-serif`
-    ctx.fillText(`✔ 레벨업 인증 · ${mission.title}`, pad, h - fs * 1.8)
+    ctx.fillText(`✔ 레벨리 인증 · ${mission.title}`, pad, h - fs * 1.8)
     ctx.font = `500 ${Math.round(fs * 0.8)}px Pretendard, sans-serif`
     ctx.fillText(takenAt.toLocaleString('ko-KR'), pad, h - fs * 0.6)
   }

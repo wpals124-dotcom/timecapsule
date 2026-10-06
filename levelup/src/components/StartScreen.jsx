@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import Mascot from './Mascot.jsx'
-import Egg from './Egg.jsx'
 import { CHARACTERS } from '../data/characters.js'
+import logo from '../logo.png'
 
 const FEATURES = [
   { icon: '🥚', text: '레벨업할 때마다 알 획득' },
@@ -32,9 +32,7 @@ export default function StartScreen({ onStart, leaving }) {
         <div className="relative h-[250px] w-[270px]">
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
             <div className="absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-duo-yellow/30 blur-xl" />
-            <div className="relative">
-              <Egg grade="legend" size={104} wobble />
-            </div>
+            <img src={logo} alt="레벨리 아이콘" className="relative h-[124px] w-[124px] animate-float drop-shadow-[0_10px_18px_rgba(229,160,0,.45)]" />
           </div>
           {CHARACTERS.map((c, i) => (
             <div
@@ -50,8 +48,8 @@ export default function StartScreen({ onStart, leaving }) {
         </div>
 
         <div className={`mt-6 text-center transition-all duration-500 ${shown ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
-          <p className="text-xs font-black uppercase tracking-[.3em] text-duo-orange">Level up your life</p>
-          <h1 className="mt-1 text-[46px] font-black leading-none tracking-tight text-duo-green drop-shadow-[0_3px_0_#58A700]">레벨업</h1>
+          <p className="text-xs font-black uppercase tracking-[.3em] text-duo-orange">LEVEL + DAILY</p>
+          <h1 className="mt-1 text-[46px] font-black leading-none tracking-tight text-duo-orange drop-shadow-[0_3px_0_#E06A00]">레벨리</h1>
           <p className="mt-3 text-[16px] font-bold leading-snug text-duo-sub">
             혼자는 힘든 자기계발,
             <br />
