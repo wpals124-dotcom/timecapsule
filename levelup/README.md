@@ -5,7 +5,18 @@
 - React 18 + Vite + Tailwind CSS, 모바일 390px 기준, Duolingo 스타일 UI
 - 데이터는 모두 더미(`src/data/dummy.js`)
 
-## 실행
+## 다른 컴퓨터 · 휴대폰에서 실행하기
+
+| 방법 | 이렇게 하세요 | 카메라 |
+|---|---|---|
+| **① 파일 하나로 실행** | `levelup/standalone/index.html`을 받아서 더블클릭 (설치 · 인터넷 불필요, 글꼴만 온라인) | 휴대폰 기본 카메라 열기 / 시연 모드 |
+| **② GitHub Pages (추천)** | 저장소 Settings → Pages → Source를 **GitHub Actions**로 바꾸고 PR을 main에 머지하면 `https://wpals124-dotcom.github.io/timecapsule/` 에 자동 배포 | 앱 안 실시간 카메라까지 동작 (HTTPS) |
+| **③ 휴대폰 앱처럼 설치** | ②의 주소를 휴대폰에서 열고 **홈 화면에 추가** (iPhone: 공유 → 홈 화면에 추가 / 안드로이드: ⋮ → 앱 설치) | ②와 같음 |
+| **④ 개발 PC에서 실행** | 아래 "개발 실행" 참고 | localhost에서 동작 |
+
+파일 하나 버전 다시 만들기: `npm run build:single` → `standalone/index.html`
+
+## 개발 실행
 ```bash
 npm install
 npm run dev      # http://localhost:5173 (같은 와이파이의 휴대폰은 표시되는 Network 주소로 접속)
