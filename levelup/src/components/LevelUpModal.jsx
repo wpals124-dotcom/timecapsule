@@ -10,7 +10,7 @@ export default function LevelUpModal({ level, items = [], onClose }) {
         <div className="my-8 animate-pop">
           <Mascot level={level} size={170} badge={false} items={items} />
         </div>
-        <p className="text-[17px] font-bold text-duo-sub">나와 레벨이가 함께 성장했어요!</p>
+        <p className="text-[17px] font-bold text-duo-sub">나와 레오가 함께 성장했어요!</p>
         <div className="card mt-5 px-5 py-3">
           <p className="text-xs font-extrabold text-duo-mute">새 칭호</p>
           <p className="text-lg font-black text-duo-green">{titleOf(level)}</p>

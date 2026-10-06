@@ -8,6 +8,7 @@ import ProfileScreen from './components/ProfileScreen.jsx'
 import BottomNav from './components/BottomNav.jsx'
 import CameraModal from './components/CameraModal.jsx'
 import LevelUpModal from './components/LevelUpModal.jsx'
+import Flame from './components/Flame.jsx'
 import * as dummy from './data/dummy.js'
 
 export default function App() {
@@ -39,23 +40,26 @@ export default function App() {
 
   function verify(mission, proof) {
     const time = proof.takenAt.toTimeString().slice(0, 5)
+    const combo = missions.filter((m) => m.done).length + 1 // 오늘 연속 인증 수
+    const bonus = Math.min(20, (combo - 1) * 5) // 콤보 보너스
+    const gained = mission.xp + bonus
     setMissions((ms) => ms.map((m) => (m.id === mission.id ? { ...m, done: true, photo: proof.photo, doneAt: time, proof } : m)))
     const statUp = Math.round(mission.xp / 5)
     setCharacter((c) => ({ ...c, stats: { ...c.stats, [mission.stat]: c.stats[mission.stat] + statUp } }))
-    setStats((s) => ({ totalXp: s.totalXp + mission.xp, totalMissions: s.totalMissions + 1 }))
+    setStats((s) => ({ totalXp: s.totalXp + gained, totalMissions: s.totalMissions + 1 }))
 
     let { level, xp } = user
-    xp += mission.xp
+    xp += gained
     let leveled = false
     while (xp >= dummy.XP_PER_LEVEL(level)) {
       xp -= dummy.XP_PER_LEVEL(level)
       level += 1
       leveled = true
     }
-    setUser((u) => ({ ...u, level, xp, weekXp: u.weekXp + mission.xp, boost: mission.boosted ? false : u.boost }))
+    setUser((u) => ({ ...u, level, xp, weekXp: u.weekXp + gained, boost: mission.boosted ? false : u.boost }))
     setCameraFor(null)
-    setXpPop({ key: Date.now(), xp: mission.xp })
-    setFeedback({ mission, statUp, nextLevel: leveled ? level : null })
+    setXpPop({ key: Date.now(), xp: gained })
+    setFeedback({ mission, statUp, bonus, gained, combo, allDone: combo === missions.length, nextLevel: leveled ? level : null })
   }
 
   function closeFeedback() {
@@ -93,7 +97,7 @@ export default function App() {
 
   const screens = {
     home: (
-      <HomeScreen user={user} character={character} missions={missions} items={equipped} onVerifyClick={openCamera} xpPop={xpPop} onNavigate={setTab} />
+      <HomeScreen user={user} character={character} missions={missions} items={equipped} onVerifyClick={openCamera} xpPop={xpPop} onNavigate={setTab} combo={doneToday} />
     ),
     missions: (
       <MissionsScreen user={user} missions={missions} quests={quests} recommended={recommended} onVerifyClick={openCamera} onClaim={claim} onAdd={addMission} />
@@ -111,6 +115,7 @@ export default function App() {
         missions={missions}
         equipped={equipped}
         leagueName={dummy.league.name}
+        character={character}
       />
     ),
   }
@@ -131,18 +136,36 @@ export default function App() {
         )}
         {cameraFor && <CameraModal mission={cameraFor} onClose={() => setCameraFor(null)} onVerify={(p) => verify(cameraFor, p)} />}
         {feedback && (
-          <div className="absolute inset-0 z-30 flex flex-col justify-end bg-black/20" onClick={closeFeedback}>
-            <div className="animate-sheet bg-duo-greenLight px-5 pb-10 pt-5" onClick={(e) => e.stopPropagation()}>
-              <p className="flex items-center gap-2 text-2xl font-black text-duo-greenDark">
-                <span className="grid h-8 w-8 place-items-center rounded-full bg-duo-greenDark text-base text-white">✓</span>
-                훌륭해요!
-              </p>
-              <p className="mt-1 font-bold text-duo-greenDark/80">
-                {feedback.mission.title} 인증 완료 · <b>+{feedback.mission.xp} XP</b>
-                {feedback.mission.boosted && ' (부스트 2배)'} · {feedback.mission.stat} +{feedback.statUp}
-              </p>
-              <button onClick={closeFeedback} className="btn-green mt-4 w-full">계속하기</button>
-            </div>
+          <div className="absolute inset-0 z-30 flex flex-col justify-end bg-black/25" onClick={closeFeedback}>
+            {feedback.combo >= 2 ? (
+              // 콤보 2회 이상: 불타는 피드백
+              <div className="relative animate-sheet overflow-hidden bg-gradient-to-br from-[#FFB020] via-duo-orange to-[#FF4B1F] px-5 pb-10 pt-5 text-white" onClick={(e) => e.stopPropagation()}>
+                <div className="pointer-events-none absolute -right-4 -top-2 opacity-90">
+                  <Flame size={96} intensity={3} />
+                </div>
+                <p className="text-sm font-black uppercase tracking-widest text-white/85">{feedback.allDone ? 'All clear' : 'Combo'}</p>
+                <p className="text-[28px] font-black leading-tight">{feedback.allDone ? '올클리어! 🔥' : `${feedback.combo}연속 인증! 🔥`}</p>
+                <p className="mt-1 font-bold text-white/90">
+                  {feedback.allDone ? '오늘 트레일을 전부 불태웠어요' : '불꽃이 점점 커지고 있어요'} · <b>+{feedback.gained} XP</b>
+                </p>
+                <p className="mt-0.5 text-sm font-bold text-white/80">
+                  기본 {feedback.mission.xp}{feedback.mission.boosted && '(부스트 2배)'} + 콤보 보너스 {feedback.bonus} · {feedback.mission.stat} +{feedback.statUp}
+                </p>
+                <button onClick={closeFeedback} className="btn mt-4 w-full border-[#E5E5E5] bg-white text-duo-orange">계속 불태우기</button>
+              </div>
+            ) : (
+              <div className="animate-sheet bg-duo-greenLight px-5 pb-10 pt-5" onClick={(e) => e.stopPropagation()}>
+                <p className="flex items-center gap-2 text-2xl font-black text-duo-greenDark">
+                  <Flame size={26} ignite />
+                  오늘의 불꽃 점화!
+                </p>
+                <p className="mt-1 font-bold text-duo-greenDark/80">
+                  {feedback.mission.title} 인증 완료 · <b>+{feedback.gained} XP</b>
+                  {feedback.mission.boosted && ' (부스트 2배)'} · {feedback.mission.stat} +{feedback.statUp}
+                </p>
+                <button onClick={closeFeedback} className="btn-green mt-4 w-full">계속하기</button>
+              </div>
+            )}
           </div>
         )}
         {levelUp && <LevelUpModal level={levelUp} items={equipped} onClose={() => setLevelUp(null)} />}

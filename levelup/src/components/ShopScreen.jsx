@@ -30,7 +30,7 @@ export default function ShopScreen({ user, items, owned, equipped, inventory, on
             <Mascot level={user.level} size={88} badge={false} float={false} items={equipped} />
           </div>
           <div>
-            <p className="text-xs font-extrabold text-white/80">내 레벨이</p>
+            <p className="text-xs font-extrabold text-white/80">내 레오</p>
             <p className="text-lg font-black leading-tight">꾸미고 같이 성장하기</p>
             <p className="mt-1 text-xs font-bold text-white/85">
               착용 중: {equipped.length ? equipped.map((id) => items.find((i) => i.id === id).name).join(', ') : '없음'}

@@ -1,9 +1,11 @@
+import Flame from './Flame.jsx'
+
 export default function PageHeader({ title, user }) {
   return (
     <header className="flex items-center gap-3 border-b-2 border-duo-line px-5 pb-3 pt-5">
       <h1 className="flex-1 text-xl font-black text-duo-text">{title}</h1>
       <span className="flex items-center gap-1 text-[15px] font-black text-duo-orange">
-        <span className="text-lg">🔥</span>
+        <Flame size={18} />
         {user.streak}
       </span>
       <span className="flex items-center gap-1 text-[15px] font-black text-duo-blue">

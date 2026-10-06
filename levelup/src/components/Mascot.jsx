@@ -1,4 +1,8 @@
-// 둥글고 단순한 레벨 마스코트 (플랫 스타일). 레벨이 오르면 장식이 하나씩 늘어난다.
+// 레오파드 게코 캐릭터 '레오'. 레벨·상점 아이템에 따라 장식이 늘어난다.
+const BODY = '#FFD45C'
+const SHADE = '#F2B53A'
+const SPOT = '#6B4426'
+
 export default function Mascot({ level = 1, size = 180, badge = true, float = true, items = [] }) {
   const has = (id) => items.includes(id)
   return (
@@ -9,82 +13,104 @@ export default function Mascot({ level = 1, size = 180, badge = true, float = tr
             Lv.{level}
           </div>
         )}
-        <svg viewBox="0 0 200 190" width={size} height={size * 0.95} aria-label={`레벨 ${level} 마스코트`}>
-          {/* Lv.3+ 새싹 */}
+        <svg viewBox="0 0 200 200" width={size} height={size} aria-label={`레벨 ${level} 레오파드 게코 레오`}>
+          {/* 꼬리: 굵은 선 + 점선으로 줄무늬 */}
+          <path d="M138 168 Q186 168 184 128 Q182 102 160 108" fill="none" stroke={SHADE} strokeWidth="26" strokeLinecap="round" />
+          <path d="M138 168 Q186 168 184 128 Q182 102 160 108" fill="none" stroke={SPOT} strokeWidth="26" strokeDasharray="5 16" strokeLinecap="butt" opacity=".75" />
+
+          {/* 몸통 */}
+          <ellipse cx="100" cy="148" rx="48" ry="40" fill={SHADE} />
+          <ellipse cx="100" cy="144" rx="48" ry="40" fill={BODY} />
+          <ellipse cx="100" cy="154" rx="28" ry="26" fill="#FFF2C7" />
+          <circle cx="66" cy="132" r="4" fill={SPOT} />
+          <circle cx="136" cy="134" r="5" fill={SPOT} />
+          <circle cx="132" cy="158" r="3.5" fill={SPOT} />
+          <circle cx="64" cy="156" r="3" fill={SPOT} />
+
+          {/* 발 (발가락 패드) */}
+          {[70, 130].map((x) => (
+            <g key={x}>
+              <ellipse cx={x} cy="182" rx="15" ry="8" fill={SHADE} />
+              <circle cx={x - 10} cy="185" r="4" fill={BODY} />
+              <circle cx={x} cy="188" r="4" fill={BODY} />
+              <circle cx={x + 10} cy="185" r="4" fill={BODY} />
+            </g>
+          ))}
+
+          {/* Lv.3+ 새싹 / Lv.7+ 왕관 (모자 쓰면 숨김) */}
           {level >= 3 && level < 7 && !has('cap') && (
             <g>
-              <path d="M100 42 L100 18" stroke="#58A700" strokeWidth="6" strokeLinecap="round" />
+              <path d="M100 40 L100 18" stroke="#58A700" strokeWidth="6" strokeLinecap="round" />
               <ellipse cx="87" cy="17" rx="14" ry="8" fill="#89E219" transform="rotate(-25 87 17)" />
               <ellipse cx="113" cy="15" rx="14" ry="8" fill="#58CC02" transform="rotate(25 113 15)" />
             </g>
           )}
-          {/* Lv.7+ 왕관 */}
-          {level >= 7 && !has('cap') && <path d="M74 40 L80 12 L92 28 L100 6 L108 28 L120 12 L126 40 Z" fill="#FFC800" stroke="#E5A000" strokeWidth="4" strokeLinejoin="round" />}
+          {level >= 7 && !has('cap') && (
+            <path d="M74 44 L80 16 L92 32 L100 10 L108 32 L120 16 L126 44 Z" fill="#FFC800" stroke="#E5A000" strokeWidth="4" strokeLinejoin="round" />
+          )}
 
-          {/* 팔 */}
-          <ellipse cx="34" cy="118" rx="15" ry="21" fill="#58A700" transform="rotate(25 34 118)" />
-          <ellipse cx="166" cy="118" rx="15" ry="21" fill="#58A700" transform="rotate(-25 166 118)" />
-          {/* 몸통 + 아래 그림자 띠(3D 느낌) */}
-          <circle cx="100" cy="114" r="70" fill="#58A700" />
-          <circle cx="100" cy="108" r="70" fill="#58CC02" />
-          {/* 배 */}
-          <ellipse cx="100" cy="140" rx="40" ry="30" fill="#89E219" />
-          {/* 하이라이트 */}
-          <ellipse cx="66" cy="66" rx="14" ry="8" fill="#fff" opacity=".45" transform="rotate(-35 66 66)" />
+          {/* 머리: 넓적한 게코 얼굴 */}
+          <ellipse cx="100" cy="92" rx="66" ry="52" fill={SHADE} />
+          <ellipse cx="100" cy="88" rx="66" ry="52" fill={BODY} />
+          {/* 머리 점무늬 */}
+          {[[72, 50, 4.5], [94, 44, 3.5], [116, 47, 5], [136, 58, 4], [56, 64, 3.5], [148, 78, 3], [52, 84, 3], [110, 60, 2.5], [84, 58, 2.5]].map(([x, y, r]) => (
+            <circle key={`${x}-${y}`} cx={x} cy={y} r={r} fill={SPOT} />
+          ))}
+          <ellipse cx="70" cy="58" rx="12" ry="6" fill="#fff" opacity=".35" transform="rotate(-25 70 58)" />
 
           {/* Lv.5+ 머리띠 */}
           {level >= 5 && (
             <g>
-              <path d="M34 80 Q100 56 166 80" stroke="#FF4B4B" strokeWidth="10" fill="none" strokeLinecap="round" />
-              <circle cx="100" cy="66" r="7" fill="#FFC800" />
+              <path d="M38 70 Q100 40 162 70" stroke="#FF4B4B" strokeWidth="9" fill="none" strokeLinecap="round" />
+              <circle cx="100" cy="55" r="6" fill="#FFC800" />
             </g>
           )}
 
-          {/* 눈: 흰자 + 눈동자 */}
-          <ellipse cx="76" cy="100" rx="17" ry="19" fill="#fff" />
-          <ellipse cx="124" cy="100" rx="17" ry="19" fill="#fff" />
-          <circle cx="79" cy="104" r="9" fill="#3C3C3C" />
-          <circle cx="121" cy="104" r="9" fill="#3C3C3C" />
-          <circle cx="82" cy="100" r="3" fill="#fff" />
-          <circle cx="124" cy="100" r="3" fill="#fff" />
-          {/* 부리 같은 입 */}
-          <path d="M90 124 Q100 138 110 124 Z" fill="#FF9600" stroke="#E5A000" strokeWidth="2" strokeLinejoin="round" />
-          {/* 볼 */}
-          <ellipse cx="54" cy="124" rx="9" ry="5" fill="#FF86D0" opacity=".55" />
-          <ellipse cx="146" cy="124" rx="9" ry="5" fill="#FF86D0" opacity=".55" />
-          {/* 상점 꾸미기: 선글라스 */}
+          {/* 큰 눈 */}
+          {[72, 128].map((x) => (
+            <g key={x}>
+              <ellipse cx={x} cy="88" rx="17" ry="18" fill={SHADE} />
+              <ellipse cx={x} cy="88" rx="14" ry="15" fill="#2B1D14" />
+              <circle cx={x + 4} cy="82" r="5" fill="#fff" />
+              <circle cx={x - 5} cy="94" r="2" fill="#fff" />
+            </g>
+          ))}
+          {/* 콧구멍 + 큰 미소 */}
+          <circle cx="94" cy="104" r="1.8" fill={SPOT} />
+          <circle cx="106" cy="104" r="1.8" fill={SPOT} />
+          <path d="M70 112 Q100 132 130 112" stroke={SPOT} strokeWidth="4" fill="none" strokeLinecap="round" />
+          <ellipse cx="50" cy="110" rx="9" ry="5" fill="#FF86D0" opacity=".55" />
+          <ellipse cx="150" cy="110" rx="9" ry="5" fill="#FF86D0" opacity=".55" />
+
+          {/* 상점: 선글라스 */}
           {has('glasses') && (
             <g>
-              <ellipse cx="76" cy="102" rx="22" ry="17" fill="#3C3C3C" />
-              <ellipse cx="124" cy="102" rx="22" ry="17" fill="#3C3C3C" />
-              <path d="M98 100 L102 100" stroke="#3C3C3C" strokeWidth="6" strokeLinecap="round" />
-              <ellipse cx="68" cy="96" rx="7" ry="4" fill="#fff" opacity=".35" transform="rotate(-20 68 96)" />
-              <ellipse cx="116" cy="96" rx="7" ry="4" fill="#fff" opacity=".35" transform="rotate(-20 116 96)" />
+              <ellipse cx="72" cy="88" rx="22" ry="18" fill="#2F2F2F" />
+              <ellipse cx="128" cy="88" rx="22" ry="18" fill="#2F2F2F" />
+              <path d="M94 86 L106 86" stroke="#2F2F2F" strokeWidth="6" strokeLinecap="round" />
+              <ellipse cx="64" cy="82" rx="7" ry="4" fill="#fff" opacity=".35" transform="rotate(-20 64 82)" />
+              <ellipse cx="120" cy="82" rx="7" ry="4" fill="#fff" opacity=".35" transform="rotate(-20 120 82)" />
             </g>
           )}
-          {/* 상점 꾸미기: 빨간 모자 */}
+          {/* 상점: 빨간 모자 */}
           {has('cap') && (
             <g>
-              <path d="M44 74 Q48 26 100 24 Q152 26 156 74 Z" fill="#FF4B4B" />
-              <path d="M44 74 Q100 62 156 74 L176 80 Q100 70 44 80 Z" fill="#EA2B2B" />
-              <circle cx="100" cy="26" r="6" fill="#EA2B2B" />
+              <path d="M44 66 Q48 22 100 20 Q152 22 156 66 Z" fill="#FF4B4B" />
+              <path d="M44 66 Q100 54 156 66 L178 72 Q100 62 44 74 Z" fill="#EA2B2B" />
+              <circle cx="100" cy="22" r="6" fill="#EA2B2B" />
             </g>
           )}
-          {/* 상점 꾸미기: 리본 */}
+          {/* 상점: 리본 */}
           {has('bow') && (
-            <g transform="translate(146 50) rotate(20)">
+            <g transform="translate(150 48) rotate(20)">
               <path d="M0 0 L-22 -14 L-22 14 Z" fill="#FF86D0" />
               <path d="M0 0 L22 -14 L22 14 Z" fill="#FF86D0" />
               <circle r="7" fill="#E05AAE" />
             </g>
           )}
-
-          {/* 발 */}
-          <ellipse cx="78" cy="180" rx="16" ry="8" fill="#FF9600" />
-          <ellipse cx="122" cy="180" rx="16" ry="8" fill="#FF9600" />
         </svg>
       </div>
-      {float && <div className="mt-1 h-3 w-1/2 rounded-full bg-black/40 animate-shadow" />}
+      {float && <div className="mt-0.5 h-3 w-1/2 rounded-full bg-black/40 animate-shadow" />}
     </div>
   )
 }

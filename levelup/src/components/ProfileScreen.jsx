@@ -1,9 +1,10 @@
 import PageHeader, { SectionTitle, Bar } from './PageHeader.jsx'
 import Avatar from './Avatar.jsx'
 import Mascot from './Mascot.jsx'
+import StatRadar from './StatRadar.jsx'
 import { titleOf } from '../data/dummy.js'
 
-export default function ProfileScreen({ user, stats, profile, achievements, missions, equipped, leagueName }) {
+export default function ProfileScreen({ user, stats, profile, achievements, missions, equipped, leagueName, character }) {
   const todayPhotos = missions.filter((m) => m.done && m.photo)
   return (
     <div className="flex h-full flex-col bg-white">
@@ -38,6 +39,18 @@ export default function ProfileScreen({ user, stats, profile, achievements, miss
             <StatBox icon="⚡" value={stats.totalXp.toLocaleString()} label="총 XP" />
             <StatBox icon="🏆" value={leagueName} label="현재 리그" />
             <StatBox icon="🎯" value={`${stats.totalMissions}개`} label="인증한 미션" />
+          </div>
+
+          {/* 능력치 삼각형 */}
+          <SectionTitle right={<span className="text-xs font-extrabold text-duo-mute">미션 인증으로 성장</span>}>{character.name}의 능력치</SectionTitle>
+          <div className="card flex items-center gap-2 p-3">
+            <StatRadar stats={character.stats} size={190} />
+            <ul className="flex-1 space-y-2 text-xs font-bold text-duo-sub">
+              <li><b className="text-duo-red">체력</b> 운동·건강 미션</li>
+              <li><b className="text-duo-blue">지식</b> 독서·공부 미션</li>
+              <li><b className="text-duo-green">마음</b> 명상·일기 미션</li>
+              <li className="pt-1 text-duo-mute">가장 높은 능력치: <b className="text-duo-text">{Object.entries(character.stats).sort((a, b) => b[1] - a[1])[0][0]}</b></li>
+            </ul>
           </div>
 
           {/* 업적 */}
