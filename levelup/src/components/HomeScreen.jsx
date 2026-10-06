@@ -7,7 +7,7 @@ const STAT_STYLE = { 체력: 'text-duo-red', 지식: 'text-duo-blue', 마음: 't
 const STAT_ICON = { 체력: '💪', 지식: '📖', 마음: '🌿' }
 const PATH_X = [0, 56, 84, 56, 0, -56, -84] // 지그재그 경로
 
-export default function HomeScreen({ user, character, missions, onVerifyClick, xpPop }) {
+export default function HomeScreen({ user, character, missions, items, onVerifyClick, xpPop, onNavigate }) {
   const [line, setLine] = useState(0)
   const nextId = missions.find((m) => !m.done)?.id
   const [selected, setSelected] = useState(null)
@@ -16,21 +16,24 @@ export default function HomeScreen({ user, character, missions, onVerifyClick, x
   const doneCount = missions.filter((m) => m.done).length
 
   return (
-    <div className="flex h-full flex-col bg-white animate-fadeUp">
+    <div className="flex h-full flex-col bg-white">
       {/* 1. 상단 프로필 + 스탯 바 */}
       <header className="flex items-center gap-3 border-b-2 border-duo-line px-4 pb-3 pt-5">
-        <div className="relative shrink-0">
+        <button onClick={() => onNavigate('profile')} className="relative shrink-0" aria-label="프로필 보기">
           <Avatar size={48} />
           <span className="absolute -bottom-1 -right-1 rounded-md border-2 border-white bg-duo-green px-1 text-[10px] font-black text-white">
             {user.level}
           </span>
-        </div>
+        </button>
         <div className="min-w-0 flex-1">
           <p className="truncate text-[15px] font-extrabold text-duo-text">{user.nickname}</p>
           <p className="text-xs font-bold text-duo-mute">{titleOf(user.level)}</p>
         </div>
+        {user.boost && <span className="rounded-lg bg-duo-yellow px-1.5 py-0.5 text-[11px] font-black text-white">⚡2배</span>}
         <Stat icon="🔥" value={user.streak} color="text-duo-orange" />
-        <Stat icon="💎" value={user.gems.toLocaleString()} color="text-duo-blue" />
+        <button onClick={() => onNavigate('shop')}>
+          <Stat icon="💎" value={user.gems.toLocaleString()} color="text-duo-blue" />
+        </button>
       </header>
 
       <div className="no-scrollbar relative flex-1 overflow-y-auto pb-8" onClick={() => setSelected(null)}>
@@ -57,7 +60,7 @@ export default function HomeScreen({ user, character, missions, onVerifyClick, x
         {/* 3. 캐릭터 */}
         <section className="card mx-4 mt-3 flex items-center gap-2 p-3">
           <button onClick={(e) => { e.stopPropagation(); setLine((l) => (l + 1) % character.lines.length) }} className="relative shrink-0">
-            <Mascot level={user.level} size={92} badge={false} />
+            <Mascot level={user.level} size={92} badge={false} items={items} />
             {xpPop && (
               <span key={xpPop.key} className="absolute left-1/2 top-2 -translate-x-1/2 whitespace-nowrap text-lg font-black text-duo-yellow animate-rise">
                 +{xpPop.xp} XP
@@ -132,7 +135,7 @@ export default function HomeScreen({ user, character, missions, onVerifyClick, x
                       </div>
                     ) : (
                       <button onClick={() => { setSelected(null); onVerifyClick(m) }} className="btn mt-3 w-full border-[#E5E5E5] bg-white text-duo-green">
-                        📷 인증하기 +{m.xp} XP
+                        📷 인증하기 +{user.boost ? m.xp * 2 : m.xp} XP
                       </button>
                     )}
                   </div>
@@ -142,7 +145,7 @@ export default function HomeScreen({ user, character, missions, onVerifyClick, x
           })}
           {/* 경로 옆 마스코트 */}
           <div className="pointer-events-none absolute -left-1 top-[110px] opacity-90">
-            <Mascot level={user.level} size={70} badge={false} float={false} />
+            <Mascot level={user.level} size={70} badge={false} float={false} items={items} />
           </div>
         </div>
 
@@ -170,24 +173,6 @@ export default function HomeScreen({ user, character, missions, onVerifyClick, x
         </section>
       </div>
 
-      {/* 6. 하단 탭 */}
-      <nav className="flex justify-around border-t-2 border-duo-line bg-white px-2 pb-6 pt-2">
-        {[
-          ['🏠', '홈', true],
-          ['🎯', '미션'],
-          ['🏆', '리그'],
-          ['🛍️', '상점'],
-          ['👤', '프로필'],
-        ].map(([icon, label, active]) => (
-          <button
-            key={label}
-            aria-label={label}
-            className={`grid h-12 w-12 place-items-center rounded-xl text-2xl ${active ? 'border-2 border-duo-blue/60 bg-duo-blueLight' : ''}`}
-          >
-            {icon}
-          </button>
-        ))}
-      </nav>
     </div>
   )
 }
