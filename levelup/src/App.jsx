@@ -2,7 +2,9 @@ import { useState } from 'react'
 import StartScreen from './components/StartScreen.jsx'
 import HomeScreen from './components/HomeScreen.jsx'
 import MissionsScreen from './components/MissionsScreen.jsx'
-import LeagueScreen from './components/LeagueScreen.jsx'
+import CommunityScreen from './components/CommunityScreen.jsx'
+import ShareSheet from './components/ShareSheet.jsx'
+import { EvolveOverlay, FriendSheet } from './components/Evolution.jsx'
 import ShopScreen from './components/ShopScreen.jsx'
 import ProfileScreen from './components/ProfileScreen.jsx'
 import BottomNav from './components/BottomNav.jsx'
@@ -13,13 +15,19 @@ import PickScreen from './components/PickScreen.jsx'
 import EggsScreen from './components/EggsScreen.jsx'
 import HatchOverlay from './components/HatchOverlay.jsx'
 import { PartnerContext } from './components/Mascot.jsx'
-import { CHARACTERS, GRADES, GRADE_ORDER, charById, rollGrade } from './data/characters.js'
+import { CHARACTERS, GRADES, GRADE_ORDER, charById, rollGrade, friendNeed, stageOf } from './data/characters.js'
 import * as dummy from './data/dummy.js'
 
 export default function App() {
   const [screen, setScreen] = useState('start') // start | leaving | pick | app
   const [partner, setPartner] = useState('gecko')
   const [collection, setCollection] = useState([])
+  const [friends, setFriends] = useState({}) // 친구별 레벨·경험치 { id: { level, xp } }
+  const [friendSheet, setFriendSheet] = useState(null)
+  const [crews, setCrews] = useState(dummy.crews)
+  const [posts, setPosts] = useState(dummy.posts)
+  const [shareFor, setShareFor] = useState(null) // 공유할 미션 id
+  const [toast, setToast] = useState(null)
   // 첫 친구 선택 후 기본으로 주는 알: 희귀 알(거의 다 데워짐) + 일반 알
   const [eggs, setEggs] = useState([
     { id: 'e1', grade: 'rare', xp: 170 },
@@ -38,7 +46,7 @@ export default function App() {
   const [equipped, setEquipped] = useState([])
   const [inventory, setInventory] = useState({ freeze: 1 })
   const [cameraFor, setCameraFor] = useState(null)
-  const [levelUp, setLevelUp] = useState(null)
+  const [queue, setQueue] = useState([]) // 레벨업 · 진화 연출 대기열
   const [xpPop, setXpPop] = useState(null)
   const [feedback, setFeedback] = useState(null) // 인증 직후 하단 피드백 시트
 
@@ -50,6 +58,8 @@ export default function App() {
   function pick(id) {
     setPartner(id)
     setCollection([id])
+    // 시연용: 첫 친구는 Lv.2(진화 직전)에서 시작
+    setFriends({ [id]: { level: 2, xp: 80 } })
     setScreen('app')
   }
 
@@ -74,7 +84,10 @@ export default function App() {
 
   function finishHatch(makePartner) {
     const { egg, result } = hatching
-    if (result.charId) setCollection((c) => [...c, result.charId])
+    if (result.charId) {
+      setCollection((c) => [...c, result.charId])
+      setFriends((f) => ({ ...f, [result.charId]: { level: 1, xp: 0 } }))
+    }
     if (result.gems) setUser((u) => ({ ...u, gems: u.gems + result.gems }))
     if (makePartner && result.charId) setPartner(result.charId)
     const rest = eggs.filter((e) => e.id !== egg.id)
@@ -108,16 +121,51 @@ export default function App() {
     }
     setUser((u) => ({ ...u, level, xp, weekXp: u.weekXp + gained, boost: mission.boosted ? false : u.boost }))
     warmEgg(gained)
+
+    // 함께하는 친구도 같은 경험치를 받아 레벨업 · 진화
+    const f = friends[partner] || { level: 1, xp: 0 }
+    let fl = f.level
+    let fx = f.xp + gained
+    while (fx >= friendNeed(fl)) {
+      fx -= friendNeed(fl)
+      fl += 1
+    }
+    setFriends((fs) => ({ ...fs, [partner]: { level: fl, xp: fx } }))
+    const evolve = stageOf(fl) > stageOf(f.level) ? { type: 'evolve', charId: partner, from: stageOf(f.level), to: stageOf(fl) } : null
     const rewardGrade = leveled ? rollGrade() : null
     if (rewardGrade) addEgg(rewardGrade)
     setCameraFor(null)
     setXpPop({ key: Date.now(), xp: gained })
-    setFeedback({ mission, statUp, bonus, gained, combo, allDone: combo === missions.length, nextLevel: leveled ? { level, rewardGrade } : null })
+    setFeedback({ mission, statUp, bonus, gained, combo, allDone: combo === missions.length, friendLv: fl > f.level ? fl : null, next: [leveled && { type: 'level', level, rewardGrade }, evolve].filter(Boolean) })
   }
 
   function closeFeedback() {
-    if (feedback.nextLevel) setLevelUp(feedback.nextLevel)
+    setQueue(feedback.next)
     setFeedback(null)
+  }
+
+  function showToast(text) {
+    setToast({ text, key: Date.now() })
+    setTimeout(() => setToast(null), 2200)
+  }
+
+  function share({ crew, caption }) {
+    const m = missions.find((x) => x.id === shareFor)
+    setPosts((ps) => [
+      { id: `my-${Date.now()}`, mine: true, crew, mission: m.title, emoji: m.emoji, photo: m.photo, caption, time: '방금', likes: 0, cheers: 0, comments: 0 },
+      ...ps,
+    ])
+    setMissions((ms) => ms.map((x) => (x.id === m.id ? { ...x, shared: crew } : x)))
+    setUser((u) => ({ ...u, gems: u.gems + 10 }))
+    setShareFor(null)
+    showToast(`${crews.find((c) => c.id === crew).name}에 올렸어요! 💎+10`)
+  }
+
+  const toggleLike = (id) => setPosts((ps) => ps.map((p) => (p.id === id ? { ...p, liked: !p.liked, likes: p.likes + (p.liked ? -1 : 1) } : p)))
+  const cheer = (id) => setPosts((ps) => ps.map((p) => (p.id === id && !p.cheered ? { ...p, cheered: true, cheers: p.cheers + 1 } : p)))
+  const joinCrew = (id) => {
+    setCrews((cs) => cs.map((c) => (c.id === id ? { ...c, joined: true, members: c.members + 1 } : c)))
+    showToast('크루에 가입했어요!')
   }
 
   // 주간 퀘스트 진행도: 지난 기록 + 오늘 인증 결과
@@ -166,6 +214,10 @@ export default function App() {
         egg={incubating}
         eggCount={eggs.length}
         onHatch={hatch}
+        friend={friends[partner] || { level: 1, xp: 0 }}
+        onFriend={() => setFriendSheet(partner)}
+        onShare={(m) => setShareFor(m.id)}
+        crews={crews}
       />
     ),
     eggs: (
@@ -178,12 +230,16 @@ export default function App() {
         onIncubate={setIncubatingId}
         onHatch={hatch}
         onPartner={setPartner}
+        friends={friends}
+        onFriend={setFriendSheet}
       />
     ),
     missions: (
-      <MissionsScreen user={user} missions={missions} quests={quests} recommended={recommended} onVerifyClick={openCamera} onClaim={claim} onAdd={addMission} />
+      <MissionsScreen user={user} missions={missions} onShare={(m) => setShareFor(m.id)} quests={quests} recommended={recommended} onVerifyClick={openCamera} onClaim={claim} onAdd={addMission} />
     ),
-    league: <LeagueScreen user={user} league={dummy.league} />,
+    community: (
+      <CommunityScreen user={user} crews={crews} posts={posts} league={dummy.league} onToggleLike={toggleLike} onCheer={cheer} onJoin={joinCrew} />
+    ),
     shop: (
       <ShopScreen user={user} items={dummy.shopItems} owned={owned} equipped={equipped} inventory={inventory} partnerName={partnerName} onBuy={buy} onToggleWear={toggleWear} />
     ),
@@ -204,7 +260,7 @@ export default function App() {
   }
 
   return (
-    <PartnerContext.Provider value={partner}>
+    <PartnerContext.Provider value={{ partner, friends }}>
     <div className="flex min-h-full items-center justify-center">
       {/* 390px 모바일 프레임 */}
       <div className="relative h-[100dvh] w-full max-w-[390px] overflow-hidden bg-white sm:h-[844px] sm:rounded-[44px] sm:border-2 sm:border-duo-line sm:shadow-xl">
@@ -237,7 +293,11 @@ export default function App() {
                 <p className="mt-0.5 text-sm font-bold text-white/80">
                   기본 {feedback.mission.xp}{feedback.mission.boosted && '(부스트 2배)'} + 콤보 보너스 {feedback.bonus} · {feedback.mission.stat} +{feedback.statUp}
                 </p>
-                <button onClick={closeFeedback} className="btn mt-4 w-full border-[#E5E5E5] bg-white text-duo-orange">계속 불태우기</button>
+                {feedback.friendLv && <p className="mt-1 text-sm font-black text-white">🐾 {partnerName} Lv.{feedback.friendLv} 달성!</p>}
+                <div className="mt-4 flex gap-2.5">
+                  <button onClick={() => { setShareFor(feedback.mission.id); closeFeedback() }} className="btn flex-1 border-white/30 bg-white/20 px-2 text-white normal-case">📸 인증샷 공유</button>
+                  <button onClick={closeFeedback} className="btn flex-1 border-[#E5E5E5] bg-white text-duo-orange">계속 불태우기</button>
+                </div>
               </div>
             ) : (
               <div className="animate-sheet bg-duo-greenLight px-5 pb-10 pt-5" onClick={(e) => e.stopPropagation()}>
@@ -249,13 +309,43 @@ export default function App() {
                   {feedback.mission.title} 인증 완료 · <b>+{feedback.gained} XP</b>
                   {feedback.mission.boosted && ' (부스트 2배)'} · {feedback.mission.stat} +{feedback.statUp}
                 </p>
-                <button onClick={closeFeedback} className="btn-green mt-4 w-full">계속하기</button>
+                {feedback.friendLv && <p className="mt-1 text-sm font-black text-duo-greenDark">🐾 {partnerName} Lv.{feedback.friendLv} 달성!</p>}
+                <div className="mt-4 flex gap-2.5">
+                  <button onClick={() => { setShareFor(feedback.mission.id); closeFeedback() }} className="btn-white flex-1 px-2 normal-case">📸 인증샷 공유</button>
+                  <button onClick={closeFeedback} className="btn-green flex-1">계속하기</button>
+                </div>
               </div>
             )}
           </div>
         )}
-        {levelUp && (
-          <LevelUpModal level={levelUp.level} rewardGrade={levelUp.rewardGrade} partnerName={partnerName} items={equipped} onClose={() => setLevelUp(null)} />
+        {queue[0]?.type === 'level' && (
+          <LevelUpModal level={queue[0].level} rewardGrade={queue[0].rewardGrade} partnerName={partnerName} items={equipped} onClose={() => setQueue((q) => q.slice(1))} />
+        )}
+        {queue[0]?.type === 'evolve' && (
+          <EvolveOverlay key={queue[0].to} charId={queue[0].charId} from={queue[0].from} to={queue[0].to} onClose={() => setQueue((q) => q.slice(1))} />
+        )}
+        {friendSheet && (
+          <FriendSheet
+            charId={friendSheet}
+            friend={friends[friendSheet] || { level: 1, xp: 0 }}
+            isPartner={friendSheet === partner}
+            onPartner={(id) => { setPartner(id); setFriendSheet(null) }}
+            onClose={() => setFriendSheet(null)}
+          />
+        )}
+        {shareFor && (
+          <ShareSheet
+            mission={missions.find((m) => m.id === shareFor)}
+            crews={crews}
+            defaultCrew={dummy.categoryCrew[missions.find((m) => m.id === shareFor)?.category]}
+            onShare={share}
+            onClose={() => setShareFor(null)}
+          />
+        )}
+        {toast && (
+          <div key={toast.key} className="pointer-events-none absolute inset-x-0 top-6 z-[70] flex justify-center animate-fadeUp">
+            <span className="rounded-2xl bg-duo-text px-4 py-2.5 text-sm font-black text-white shadow-lg">{toast.text}</span>
+          </div>
         )}
         {hatching && (
           <HatchOverlay egg={hatching.egg} result={hatching.result} onPartner={() => finishHatch(true)} onClose={() => finishHatch(false)} />

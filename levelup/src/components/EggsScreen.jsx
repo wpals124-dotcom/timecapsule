@@ -1,9 +1,9 @@
 import PageHeader, { SectionTitle, Bar } from './PageHeader.jsx'
 import Mascot from './Mascot.jsx'
 import Egg, { GradeChip } from './Egg.jsx'
-import { CHARACTERS, GRADES, GRADE_ORDER } from '../data/characters.js'
+import { CHARACTERS, GRADES, GRADE_ORDER, stageInfo } from '../data/characters.js'
 
-export default function EggsScreen({ user, eggs, incubatingId, owned, partner, onIncubate, onHatch, onPartner }) {
+export default function EggsScreen({ user, eggs, incubatingId, owned, partner, onIncubate, onHatch, onPartner, friends, onFriend }) {
   const cur = eggs.find((e) => e.id === incubatingId)
   const waiting = eggs.filter((e) => e.id !== incubatingId)
   const need = cur ? GRADES[cur.grade].hatchXp : 0
@@ -90,17 +90,21 @@ export default function EggsScreen({ user, eggs, incubatingId, owned, partner, o
                   return (
                     <div
                       key={c.id}
-                      className="card flex flex-col items-center p-2 text-center"
+                      onClick={have ? () => onFriend(c.id) : undefined}
+                      role={have ? 'button' : undefined}
+                      className={`card flex flex-col items-center p-2 text-center ${have ? 'cursor-pointer' : ''}`}
                       style={with_ ? { borderColor: GRADES[g].color, background: GRADES[g].light } : undefined}
                     >
-                      <Mascot charId={c.id} size={70} badge={false} float={false} silhouette={!have} />
+                      <Mascot charId={c.id} size={70} badge={false} float={false} silhouette={!have} stage={have ? undefined : 2} />
                       <p className="text-sm font-black">{have ? c.name : '???'}</p>
-                      <p className="text-[10px] font-bold text-duo-mute">{have ? c.species : `${GRADES[g].label} 알에서 등장`}</p>
+                      <p className="text-[10px] font-bold text-duo-mute">
+                        {have ? `Lv.${friends[c.id]?.level ?? 1} ${stageInfo(friends[c.id]?.level ?? 1).name}` : `${GRADES[g].label} 알에서 등장`}
+                      </p>
                       {have &&
                         (with_ ? (
                           <span className="mt-1.5 text-[11px] font-black" style={{ color: GRADES[g].dark }}>함께하는 중</span>
                         ) : (
-                          <button onClick={() => onPartner(c.id)} className="btn-white mt-1.5 w-full px-0 py-1 text-[11px]">함께하기</button>
+                          <button onClick={(e) => { e.stopPropagation(); onPartner(c.id) }} className="btn-white mt-1.5 w-full px-0 py-1 text-[11px]">함께하기</button>
                         ))}
                     </div>
                   )

@@ -10,7 +10,7 @@ export default function LevelUpModal({ level, items = [], rewardGrade, partnerNa
         <p className="text-sm font-black tracking-widest text-duo-orange">LEVEL UP!</p>
         <h2 className="mt-2 text-[34px] font-black text-duo-yellow drop-shadow-[0_3px_0_#E5A000]">Lv.{level} 달성</h2>
         <div className="my-8 animate-pop">
-          <Mascot level={level} size={170} badge={false} items={items} />
+          <Mascot size={170} badge={false} items={items} />
         </div>
         <p className="text-[17px] font-bold text-duo-sub">나와 {partnerName}, 함께 성장했어요!</p>
         <div className="mt-5 flex gap-2.5">

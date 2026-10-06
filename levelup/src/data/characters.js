@@ -35,3 +35,14 @@ export function josa(word, withBatchim, without) {
   const code = word.charCodeAt(word.length - 1) - 0xac00
   return word + (code >= 0 && code % 28 ? withBatchim : without)
 }
+
+// ---- 친구 레벨 · 진화 ----
+// 친구마다 레벨이 따로 있고, 레벨에 따라 3단계로 진화한다.
+export const STAGES = [
+  { stage: 1, name: '아기', from: 1, desc: '알껍데기를 아직 못 벗은 갓난이' },
+  { stage: 2, name: '성장기', from: 3, desc: '새싹을 틔우며 쑥쑥 크는 중' },
+  { stage: 3, name: '완전체', from: 6, desc: '망토와 왕관을 두른 최종 진화' },
+]
+export const stageOf = (level) => (level >= 6 ? 3 : level >= 3 ? 2 : 1)
+export const stageInfo = (level) => STAGES[stageOf(level) - 1]
+export const friendNeed = (level) => level * 50

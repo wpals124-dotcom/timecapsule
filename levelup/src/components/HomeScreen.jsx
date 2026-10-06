@@ -5,14 +5,14 @@ import Flame from './Flame.jsx'
 import StatRadar from './StatRadar.jsx'
 import Egg, { GradeChip } from './Egg.jsx'
 import { XP_PER_LEVEL, titleOf, week } from '../data/dummy.js'
-import { GRADES } from '../data/characters.js'
+import { GRADES, friendNeed, stageInfo, STAGES, stageOf } from '../data/characters.js'
 
 // 성장 트레일: 미션이 구불구불한 길 위의 징검돌로 놓이고, 레오가 현재 단계 위에 올라가 있다.
 const GAP = 124
 const SWAY = 78
 const pos = (i) => ({ x: Math.round(Math.sin((i * Math.PI) / 2) * SWAY), y: 56 + i * GAP })
 
-export default function HomeScreen({ user, character, partnerName, missions, items, onVerifyClick, xpPop, onNavigate, combo, egg, eggCount, onHatch }) {
+export default function HomeScreen({ user, character, partnerName, missions, items, onVerifyClick, xpPop, onNavigate, combo, egg, eggCount, onHatch, friend, onFriend, onShare, crews }) {
   const [line, setLine] = useState(0)
   const [sheet, setSheet] = useState(null)
   const need = XP_PER_LEVEL(user.level)
@@ -68,7 +68,7 @@ export default function HomeScreen({ user, character, partnerName, missions, ite
         <section className="card mx-4 mt-3 p-3">
           <div className="flex items-center gap-1">
             <button onClick={() => setLine((l) => (l + 1) % character.lines.length)} className="relative shrink-0" aria-label={`${partnerName}에게 말 걸기`}>
-              <Mascot level={user.level} size={96} badge={false} items={items} />
+              <Mascot size={96} badge={false} items={items} />
               {xpPop && (
                 <span key={xpPop.key} className="absolute left-1/2 top-2 -translate-x-1/2 whitespace-nowrap text-lg font-black text-duo-yellow animate-rise">
                   +{xpPop.xp} XP
@@ -84,6 +84,22 @@ export default function HomeScreen({ user, character, partnerName, missions, ite
             <span className="absolute -top-1.5 left-10 h-3 w-3 rotate-45 bg-duo-bg" />
             {character.lines[line]}
           </div>
+          {/* 친구 레벨 · 진화 */}
+          <button onClick={onFriend} className="mt-2 flex w-full items-center gap-2.5 rounded-xl border-2 border-duo-line px-3 py-2 text-left">
+            <span className="rounded-lg bg-duo-green px-1.5 py-0.5 text-[11px] font-black text-white">Lv.{friend.level}</span>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-black">
+                {partnerName} · {stageInfo(friend.level).name}
+                <span className="ml-1 font-bold text-duo-mute">
+                  {STAGES[stageOf(friend.level)] ? `Lv.${STAGES[stageOf(friend.level)].from}에 ${STAGES[stageOf(friend.level)].name} 진화` : '최종 진화'}
+                </span>
+              </p>
+              <div className="mt-1 h-2 overflow-hidden rounded-full bg-duo-line">
+                <div className="h-full rounded-full bg-duo-green transition-all duration-700" style={{ width: `${(friend.xp / friendNeed(friend.level)) * 100}%` }} />
+              </div>
+            </div>
+            <span className="text-xs font-black text-duo-blue">진화 보기 ›</span>
+          </button>
         </section>
 
         {/* 알 부화 카드 */}
@@ -191,7 +207,7 @@ export default function HomeScreen({ user, character, partnerName, missions, ite
             className="pointer-events-none absolute z-10 transition-all duration-700 ease-out"
             style={{ left: `calc(50% + ${leo.x}px)`, top: leo.y - 62, transform: 'translate(-50%,-50%)' }}
           >
-            <Mascot level={user.level} size={58} badge={false} items={items} />
+            <Mascot size={58} badge={false} items={items} />
           </div>
         </div>
 
@@ -219,6 +235,17 @@ export default function HomeScreen({ user, character, partnerName, missions, ite
                 {sheet.photo && <img src={sheet.photo} alt="인증 사진" className="h-16 w-16 rounded-xl object-cover" />}
                 <p className="text-sm font-extrabold text-duo-orange">🔥 {sheet.doneAt} 인증 완료! 불꽃이 이어지고 있어요.</p>
               </div>
+            ) : null}
+            {sheet.done ? (
+              (() => {
+                const cur = missions.find((m) => m.id === sheet.id)
+                const crew = crews.find((c) => c.id === cur?.shared)
+                return crew ? (
+                  <p className="mt-3 text-center text-sm font-black text-duo-blue">✓ {crew.emoji} {crew.name}에 공유했어요</p>
+                ) : (
+                  <button onClick={() => { setSheet(null); onShare(cur) }} className="btn-blue mt-3 w-full normal-case">📸 커뮤니티에 인증샷 올리기</button>
+                )
+              })()
             ) : (
               <>
                 <p className="mt-4 rounded-2xl bg-duo-bg p-3 text-sm font-bold text-duo-sub">📌 {sheet.guide}<br /><span className="text-xs text-duo-mute">앱 카메라로 지금 찍은 사진만 인증돼요</span></p>

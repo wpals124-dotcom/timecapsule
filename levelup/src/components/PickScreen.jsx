@@ -59,7 +59,7 @@ export default function PickScreen({ onPick }) {
           <div className="mt-2 flex justify-between">
             {others.map((x) => (
               <div key={x.id} className="flex flex-col items-center">
-                <Mascot charId={x.id} size={48} badge={false} float={false} silhouette />
+                <Mascot charId={x.id} size={48} badge={false} float={false} silhouette stage={2} />
                 <GradeChip grade={x.grade} />
               </div>
             ))}

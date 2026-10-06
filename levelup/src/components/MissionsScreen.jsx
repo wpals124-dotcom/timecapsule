@@ -1,6 +1,6 @@
 import PageHeader, { SectionTitle, Bar } from './PageHeader.jsx'
 
-export default function MissionsScreen({ user, missions, quests, recommended, onVerifyClick, onClaim, onAdd }) {
+export default function MissionsScreen({ user, missions, onShare, quests, recommended, onVerifyClick, onClaim, onAdd }) {
   const done = missions.filter((m) => m.done).length
   return (
     <div className="flex h-full flex-col bg-white">
@@ -53,7 +53,11 @@ export default function MissionsScreen({ user, missions, quests, recommended, on
                 </p>
               </div>
               {m.done ? (
-                <span className="text-sm font-black text-duo-green">완료 ✓</span>
+                m.shared ? (
+                  <span className="text-xs font-black text-duo-blue">공유됨 ✓</span>
+                ) : (
+                  <button onClick={() => onShare(m)} className="btn-white px-2.5 py-2 text-xs normal-case">📸 공유</button>
+                )
               ) : (
                 <button onClick={() => onVerifyClick(m)} className="btn-green px-3 py-2 text-xs">📷 인증</button>
               )}

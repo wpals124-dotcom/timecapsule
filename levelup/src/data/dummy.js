@@ -105,3 +105,22 @@ export const achievements = [
   { id: 'a3', name: '성장 중', desc: '레벨 달성', emoji: '🌱', key: 'level', tiers: [2, 5, 10, 20] },
   { id: 'a4', name: '경험치 부자', desc: '누적 XP', emoji: '⚡', key: 'totalXp', tiers: [500, 2500, 5000, 10000] },
 ]
+
+// ---- 커뮤니티 ----
+export const crews = [
+  { id: 'c1', name: '새벽 6시 러닝 크루', emoji: '🏃', members: 128, rate: 72, joined: true, category: ['운동'] },
+  { id: 'c2', name: '하루 20쪽 독서방', emoji: '📚', members: 342, rate: 64, joined: true, category: ['독서'] },
+  { id: 'c3', name: '물 2L 챌린지', emoji: '💧', members: 521, rate: 81, joined: true, category: ['건강'] },
+  { id: 'c4', name: '영어 단어 매일 30개', emoji: '✍️', members: 210, rate: 58, joined: false, category: ['공부'] },
+  { id: 'c5', name: '마음챙김 명상 모임', emoji: '🧘', members: 89, rate: 66, joined: false, category: ['마음'] },
+]
+
+// 사진은 더미라 이모지 + 색 배경 타일로 표현
+export const posts = [
+  { id: 'p1', author: '새벽러너', color: '#1CB0F6', crew: 'c1', mission: '아침 운동 30분', emoji: '🏃', bg: '#DDF4FF', caption: '한강 5km 완주! 오늘 공기 최고였어요', time: '25분 전', likes: 24, cheers: 8, comments: 5 },
+  { id: 'p2', author: '책벌레 소연', color: '#CE82FF', crew: 'c2', mission: '책 20페이지 읽기', emoji: '📚', bg: '#F1E3FF', caption: '「아주 작은 습관의 힘」 3장까지. 1% 성장 문장 너무 좋다', time: '1시간 전', likes: 41, cheers: 12, comments: 9 },
+  { id: 'p3', author: '물마시기장인', color: '#FF86D0', crew: 'c3', mission: '물 2L 마시기', emoji: '💧', bg: '#E0F7FF', caption: '오후 3시인데 벌써 1.5L! 텀블러 바꾸니까 잘 마셔져요', time: '2시간 전', likes: 17, cheers: 3, comments: 2 },
+  { id: 'p4', author: '루틴왕 민수', color: '#FF9600', crew: 'c1', mission: '아침 운동 30분', emoji: '🏋️', bg: '#FFF3E0', caption: '스쿼트 100개 + 플랭크 3분. 32일째 연속!', time: '3시간 전', likes: 66, cheers: 21, comments: 14 },
+  { id: 'p5', author: '하루한걸음', color: '#58CC02', crew: 'c2', mission: '책 20페이지 읽기', emoji: '📖', bg: '#D7FFB8', caption: '출근길 지하철 독서 성공 🙌', time: '5시간 전', likes: 12, cheers: 4, comments: 1 },
+]
+export const categoryCrew = { 운동: 'c1', 독서: 'c2', 건강: 'c3', 공부: 'c4', 마음: 'c5' }

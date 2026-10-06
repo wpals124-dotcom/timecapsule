@@ -43,7 +43,7 @@ export default function StartScreen({ onStart, leaving }) {
               style={{ left: `${RING[i][0]}%`, top: `${RING[i][1]}%`, transitionDelay: `${i * 90}ms` }}
             >
               <div className="animate-drift" style={{ animationDelay: `${i * 0.4}s` }}>
-                <Mascot charId={c.id} size={58} badge={false} float={false} />
+                <Mascot charId={c.id} size={58} badge={false} float={false} stage={2} />
               </div>
             </div>
           ))}

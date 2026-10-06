@@ -2,14 +2,24 @@ import PageHeader from './PageHeader.jsx'
 import Avatar from './Avatar.jsx'
 
 export default function LeagueScreen({ user, league }) {
+  return (
+    <div className="flex h-full flex-col bg-white">
+      <PageHeader title="리그" user={user} />
+      <div className="no-scrollbar flex-1 overflow-y-auto pb-8">
+        <LeagueBody user={user} league={league} />
+      </div>
+    </div>
+  )
+}
+
+// 커뮤니티 > 리그 하위 탭에서도 쓰는 본문
+export function LeagueBody({ user, league }) {
   const rows = [...league.rivals, { name: user.nickname, xp: user.weekXp, me: true }].sort((a, b) => b.xp - a.xp)
   const myRank = rows.findIndex((r) => r.me) + 1
   const demoteFrom = rows.length - league.demote
 
   return (
-    <div className="flex h-full flex-col bg-white">
-      <PageHeader title="리그" user={user} />
-      <div className="no-scrollbar flex-1 overflow-y-auto pb-8">
+    <>
         <section className="flex flex-col items-center border-b-2 border-duo-line px-5 pb-5 pt-5 text-center">
           <div className="flex items-end gap-3">
             <Shield color="#CD7F32" dim />
@@ -50,8 +60,7 @@ export default function LeagueScreen({ user, league }) {
             )
           })}
         </ol>
-      </div>
-    </div>
+    </>
   )
 }
 

@@ -29,7 +29,7 @@ export default function ShopScreen({ user, items, owned, equipped, inventory, pa
         {/* 미리보기 */}
         <section className="mt-5 flex items-center gap-4 rounded-2xl border-b-4 border-duo-blueDark bg-duo-blue p-4 text-white">
           <div className="shrink-0 rounded-2xl bg-white/20 p-2">
-            <Mascot level={user.level} size={88} badge={false} float={false} items={equipped} />
+            <Mascot size={88} badge={false} float={false} items={equipped} />
           </div>
           <div>
             <p className="text-xs font-extrabold text-white/80">내 {partnerName}</p>

@@ -2,7 +2,7 @@ export const TABS = [
   { id: 'home', icon: '🏠', label: '홈' },
   { id: 'missions', icon: '🎯', label: '미션' },
   { id: 'eggs', icon: '🥚', label: '부화장' },
-  { id: 'league', icon: '🏆', label: '리그' },
+  { id: 'community', icon: '💬', label: '커뮤니티' },
   { id: 'shop', icon: '🛍️', label: '상점' },
 ]
 

@@ -27,7 +27,7 @@ export default function ProfileScreen({ user, stats, profile, achievements, miss
           <div className="relative">
             <Avatar size={84} />
             <div className="absolute -bottom-3 -right-4">
-              <Mascot level={user.level} size={52} badge={false} float={false} items={equipped} />
+              <Mascot size={52} badge={false} float={false} items={equipped} />
             </div>
           </div>
         </section>
