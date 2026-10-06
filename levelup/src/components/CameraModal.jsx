@@ -66,6 +66,37 @@ export default function CameraModal({ mission, onClose, onVerify }) {
     setPhoto(canvas.toDataURL('image/jpeg', 0.85))
   }
 
+  // 실시간 카메라를 못 쓰는 환경(일부 웹뷰 등): 휴대폰 기본 카메라를 바로 연다(capture).
+  // 방금 찍은 사진인지 파일 시각으로 확인해 예전 사진·편집본을 거부한다.
+  const fileRef = useRef(null)
+  const [fileError, setFileError] = useState('')
+  function onFile(e) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    if (Date.now() - file.lastModified > 2 * 60 * 1000) {
+      setFileError('방금 촬영한 사진만 인증할 수 있어요. 다시 찍어주세요.')
+      return
+    }
+    setFileError('')
+    const img = new Image()
+    img.onload = () => {
+      const size = Math.min(img.naturalWidth, img.naturalHeight, 1280)
+      const src = Math.min(img.naturalWidth, img.naturalHeight)
+      const canvas = document.createElement('canvas')
+      canvas.width = size
+      canvas.height = size
+      const ctx = canvas.getContext('2d')
+      ctx.drawImage(img, (img.naturalWidth - src) / 2, (img.naturalHeight - src) / 2, src, src, 0, 0, size, size)
+      const takenAt = new Date()
+      stamp(ctx, size, size, takenAt)
+      URL.revokeObjectURL(img.src)
+      setMeta({ takenAt, source: 'device-camera', facing: null, filter: 'none' })
+      setPhoto(canvas.toDataURL('image/jpeg', 0.85))
+    }
+    img.src = URL.createObjectURL(file)
+  }
+
   // 카메라가 없는 PC에서 시연할 때만 쓰는 대체 이미지
   function demoCapture() {
     const size = 720
@@ -119,12 +150,13 @@ export default function CameraModal({ mission, onClose, onVerify }) {
             {status === 'error' && (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-8 text-center">
                 <p className="text-4xl">📷</p>
-                <p className="text-sm font-bold text-duo-sub">
-                  카메라를 사용할 수 없어요.
-                  <br />
-                  브라우저의 카메라 권한을 허용해 주세요.
-                </p>
-                <button onClick={demoCapture} className="btn-white mt-2 py-2 text-xs">
+                <p className="text-sm font-bold text-duo-sub">휴대폰 카메라로 바로 찍어서 인증해요</p>
+                <button onClick={() => fileRef.current?.click()} className="btn-blue mt-1 py-3 text-sm">
+                  카메라 열기
+                </button>
+                <input ref={fileRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onFile} />
+                {fileError && <p className="text-xs font-bold text-duo-red">{fileError}</p>}
+                <button onClick={demoCapture} className="mt-1 text-xs font-bold text-duo-mute underline">
                   (프로토타입) 카메라 없이 시연
                 </button>
               </div>

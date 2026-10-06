@@ -12,7 +12,7 @@ export default {
           text: '#4B4B4B', sub: '#777777', mute: '#AFAFAF', line: '#E5E5E5', bg: '#F7F7F7',
         },
       },
-      fontFamily: { sans: ['Nunito', 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'sans-serif'] },
+      fontFamily: { sans: ['Nunito', 'Noto Sans KR', 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'sans-serif'] },
       keyframes: {
         float: { '0%,100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-14px)' } },
         shadow: { '0%,100%': { transform: 'scaleX(1)', opacity: '.25' }, '50%': { transform: 'scaleX(.75)', opacity: '.12' } },
