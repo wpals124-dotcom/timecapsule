@@ -3,14 +3,16 @@ import Avatar from './Avatar.jsx'
 import Mascot from './Mascot.jsx'
 import Flame from './Flame.jsx'
 import StatRadar from './StatRadar.jsx'
+import Egg, { GradeChip } from './Egg.jsx'
 import { XP_PER_LEVEL, titleOf, week } from '../data/dummy.js'
+import { GRADES } from '../data/characters.js'
 
 // 성장 트레일: 미션이 구불구불한 길 위의 징검돌로 놓이고, 레오가 현재 단계 위에 올라가 있다.
 const GAP = 124
 const SWAY = 78
 const pos = (i) => ({ x: Math.round(Math.sin((i * Math.PI) / 2) * SWAY), y: 56 + i * GAP })
 
-export default function HomeScreen({ user, character, missions, items, onVerifyClick, xpPop, onNavigate, combo }) {
+export default function HomeScreen({ user, character, partnerName, missions, items, onVerifyClick, xpPop, onNavigate, combo, egg, eggCount, onHatch }) {
   const [line, setLine] = useState(0)
   const [sheet, setSheet] = useState(null)
   const need = XP_PER_LEVEL(user.level)
@@ -65,7 +67,7 @@ export default function HomeScreen({ user, character, missions, items, onVerifyC
         {/* 3. 레오 + 능력치 삼각형 */}
         <section className="card mx-4 mt-3 p-3">
           <div className="flex items-center gap-1">
-            <button onClick={() => setLine((l) => (l + 1) % character.lines.length)} className="relative shrink-0" aria-label="레오에게 말 걸기">
+            <button onClick={() => setLine((l) => (l + 1) % character.lines.length)} className="relative shrink-0" aria-label={`${partnerName}에게 말 걸기`}>
               <Mascot level={user.level} size={96} badge={false} items={items} />
               {xpPop && (
                 <span key={xpPop.key} className="absolute left-1/2 top-2 -translate-x-1/2 whitespace-nowrap text-lg font-black text-duo-yellow animate-rise">
@@ -74,7 +76,7 @@ export default function HomeScreen({ user, character, missions, items, onVerifyC
               )}
             </button>
             <div className="flex min-w-0 flex-1 flex-col items-center">
-              <p className="mb-1.5 text-xs font-black text-duo-mute">{character.name}의 능력치</p>
+              <p className="mb-1.5 text-xs font-black text-duo-mute">{partnerName}의 능력치</p>
               <StatRadar stats={character.stats} size={196} />
             </div>
           </div>
@@ -83,6 +85,9 @@ export default function HomeScreen({ user, character, missions, items, onVerifyC
             {character.lines[line]}
           </div>
         </section>
+
+        {/* 알 부화 카드 */}
+        <EggCard egg={egg} eggCount={eggCount} onOpen={() => onNavigate('eggs')} onHatch={onHatch} />
 
         {/* 4. 불꽃 스트릭 */}
         <section className={`relative mx-4 mt-3 overflow-hidden rounded-2xl p-4 text-white transition-colors duration-700 ${
@@ -224,5 +229,39 @@ export default function HomeScreen({ user, character, missions, items, onVerifyC
         </div>
       )}
     </div>
+  )
+}
+
+function EggCard({ egg, eggCount, onOpen, onHatch }) {
+  if (!egg) {
+    return (
+      <button onClick={onOpen} className="card mx-4 mt-3 flex w-[calc(100%-2rem)] items-center gap-3 p-3 text-left">
+        <span className="text-3xl">🪺</span>
+        <span className="flex-1 text-sm font-extrabold text-duo-sub">부화 중인 알이 없어요. 레벨업하면 알을 받아요!</span>
+      </button>
+    )
+  }
+  const g = GRADES[egg.grade]
+  const ready = egg.xp >= g.hatchXp
+  return (
+    <section className="mx-4 mt-3 flex items-center gap-3 rounded-2xl border-2 border-b-4 p-3" style={{ background: g.light, borderColor: g.color }}>
+      <button onClick={onOpen} className="grid h-16 w-14 shrink-0 place-items-center" aria-label="부화장 열기">
+        <Egg grade={egg.grade} size={48} progress={egg.xp / g.hatchXp} ready={ready} />
+      </button>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-1.5">
+          <GradeChip grade={egg.grade} />
+          <span className="text-sm font-black" style={{ color: g.dark }}>{ready ? '부화 준비 완료!' : '알 부화 중'}</span>
+          {eggCount > 1 && <span className="ml-auto text-[11px] font-black text-duo-mute">+{eggCount - 1}개 대기</span>}
+        </div>
+        <div className="mt-1.5 h-3 overflow-hidden rounded-full bg-white">
+          <div className="h-full rounded-full transition-all duration-700" style={{ width: `${Math.min(100, (egg.xp / g.hatchXp) * 100)}%`, background: ready ? '#58CC02' : g.color }} />
+        </div>
+        <p className="mt-1 text-[11px] font-black text-duo-sub">{ready ? '눌러서 새 친구를 만나보세요' : `${egg.xp}/${g.hatchXp} XP · 미션 경험치가 알을 데워요`}</p>
+      </div>
+      {ready && (
+        <button onClick={() => onHatch(egg)} className="btn-green shrink-0 px-3 py-2 text-xs normal-case">🐣 부화</button>
+      )}
+    </section>
   )
 }

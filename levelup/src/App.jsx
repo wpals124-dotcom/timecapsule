@@ -9,10 +9,24 @@ import BottomNav from './components/BottomNav.jsx'
 import CameraModal from './components/CameraModal.jsx'
 import LevelUpModal from './components/LevelUpModal.jsx'
 import Flame from './components/Flame.jsx'
+import PickScreen from './components/PickScreen.jsx'
+import EggsScreen from './components/EggsScreen.jsx'
+import HatchOverlay from './components/HatchOverlay.jsx'
+import { PartnerContext } from './components/Mascot.jsx'
+import { CHARACTERS, GRADES, GRADE_ORDER, charById, rollGrade } from './data/characters.js'
 import * as dummy from './data/dummy.js'
 
 export default function App() {
-  const [screen, setScreen] = useState('start') // start | leaving | app
+  const [screen, setScreen] = useState('start') // start | leaving | pick | app
+  const [partner, setPartner] = useState('gecko')
+  const [collection, setCollection] = useState([])
+  // 첫 친구 선택 후 기본으로 주는 알: 희귀 알(거의 다 데워짐) + 일반 알
+  const [eggs, setEggs] = useState([
+    { id: 'e1', grade: 'rare', xp: 170 },
+    { id: 'e2', grade: 'common', xp: 0 },
+  ])
+  const [incubatingId, setIncubatingId] = useState('e1')
+  const [hatching, setHatching] = useState(null)
   const [tab, setTab] = useState('home')
   const [user, setUser] = useState({ ...dummy.user, boost: false })
   const [stats, setStats] = useState({ totalXp: dummy.profile.totalXp, totalMissions: dummy.profile.totalMissions })
@@ -30,7 +44,43 @@ export default function App() {
 
   function start() {
     setScreen('leaving')
-    setTimeout(() => setScreen('app'), 450)
+    setTimeout(() => setScreen('pick'), 450)
+  }
+
+  function pick(id) {
+    setPartner(id)
+    setCollection([id])
+    setScreen('app')
+  }
+
+  // 부화기 알에 경험치 넣기 (부화 필요 XP에서 멈춤)
+  function warmEgg(xp) {
+    setEggs((es) => es.map((e) => (e.id === incubatingId ? { ...e, xp: Math.min(GRADES[e.grade].hatchXp, e.xp + xp) } : e)))
+  }
+
+  function addEgg(grade) {
+    const egg = { id: `e${Date.now()}${Math.random().toString(36).slice(2, 5)}`, grade, xp: 0 }
+    setEggs((es) => [...es, egg])
+    setIncubatingId((cur) => cur ?? egg.id)
+  }
+
+  function hatch(egg) {
+    const pool = CHARACTERS.filter((c) => c.grade === egg.grade && !collection.includes(c.id))
+    const result = pool.length
+      ? { charId: pool[Math.floor(Math.random() * pool.length)].id }
+      : { gems: 100 * (GRADE_ORDER.indexOf(egg.grade) + 1) }
+    setHatching({ egg, result })
+  }
+
+  function finishHatch(makePartner) {
+    const { egg, result } = hatching
+    if (result.charId) setCollection((c) => [...c, result.charId])
+    if (result.gems) setUser((u) => ({ ...u, gems: u.gems + result.gems }))
+    if (makePartner && result.charId) setPartner(result.charId)
+    const rest = eggs.filter((e) => e.id !== egg.id)
+    setEggs(rest)
+    setIncubatingId(rest[0]?.id ?? null)
+    setHatching(null)
   }
 
   // 부스트가 켜져 있으면 카메라 화면에도 2배 XP로 보여준다
@@ -57,9 +107,12 @@ export default function App() {
       leveled = true
     }
     setUser((u) => ({ ...u, level, xp, weekXp: u.weekXp + gained, boost: mission.boosted ? false : u.boost }))
+    warmEgg(gained)
+    const rewardGrade = leveled ? rollGrade() : null
+    if (rewardGrade) addEgg(rewardGrade)
     setCameraFor(null)
     setXpPop({ key: Date.now(), xp: gained })
-    setFeedback({ mission, statUp, bonus, gained, combo, allDone: combo === missions.length, nextLevel: leveled ? level : null })
+    setFeedback({ mission, statUp, bonus, gained, combo, allDone: combo === missions.length, nextLevel: leveled ? { level, rewardGrade } : null })
   }
 
   function closeFeedback() {
@@ -84,6 +137,7 @@ export default function App() {
 
   function buy(item) {
     setUser((u) => ({ ...u, gems: u.gems - item.price, boost: item.id === 'boost' ? true : u.boost }))
+    if (item.type === 'egg') addEgg(item.grade)
     if (item.id === 'freeze') setInventory((inv) => ({ ...inv, freeze: (inv.freeze || 0) + 1 }))
     if (item.type === 'wear') {
       setOwned((o) => [...o, item.id])
@@ -95,16 +149,43 @@ export default function App() {
     setEquipped((e) => (e.includes(id) ? e.filter((x) => x !== id) : [...e, id]))
   }
 
+  const partnerName = charById(partner).name
+  const incubating = eggs.find((e) => e.id === incubatingId)
   const screens = {
     home: (
-      <HomeScreen user={user} character={character} missions={missions} items={equipped} onVerifyClick={openCamera} xpPop={xpPop} onNavigate={setTab} combo={doneToday} />
+      <HomeScreen
+        user={user}
+        character={character}
+        partnerName={partnerName}
+        missions={missions}
+        items={equipped}
+        onVerifyClick={openCamera}
+        xpPop={xpPop}
+        onNavigate={setTab}
+        combo={doneToday}
+        egg={incubating}
+        eggCount={eggs.length}
+        onHatch={hatch}
+      />
+    ),
+    eggs: (
+      <EggsScreen
+        user={user}
+        eggs={eggs}
+        incubatingId={incubatingId}
+        owned={collection}
+        partner={partner}
+        onIncubate={setIncubatingId}
+        onHatch={hatch}
+        onPartner={setPartner}
+      />
     ),
     missions: (
       <MissionsScreen user={user} missions={missions} quests={quests} recommended={recommended} onVerifyClick={openCamera} onClaim={claim} onAdd={addMission} />
     ),
     league: <LeagueScreen user={user} league={dummy.league} />,
     shop: (
-      <ShopScreen user={user} items={dummy.shopItems} owned={owned} equipped={equipped} inventory={inventory} onBuy={buy} onToggleWear={toggleWear} />
+      <ShopScreen user={user} items={dummy.shopItems} owned={owned} equipped={equipped} inventory={inventory} partnerName={partnerName} onBuy={buy} onToggleWear={toggleWear} />
     ),
     profile: (
       <ProfileScreen
@@ -116,11 +197,14 @@ export default function App() {
         equipped={equipped}
         leagueName={dummy.league.name}
         character={character}
+        partnerName={partnerName}
+        collection={`${collection.length}/${CHARACTERS.length}`}
       />
     ),
   }
 
   return (
+    <PartnerContext.Provider value={partner}>
     <div className="flex min-h-full items-center justify-center">
       {/* 390px 모바일 프레임 */}
       <div className="relative h-[100dvh] w-full max-w-[390px] overflow-hidden bg-white sm:h-[844px] sm:rounded-[44px] sm:border-2 sm:border-duo-line sm:shadow-xl">
@@ -131,6 +215,8 @@ export default function App() {
             </div>
             <BottomNav tab={tab} onChange={setTab} />
           </div>
+        ) : screen === 'pick' ? (
+          <PickScreen onPick={pick} />
         ) : (
           <StartScreen onStart={start} leaving={screen === 'leaving'} />
         )}
@@ -168,8 +254,14 @@ export default function App() {
             )}
           </div>
         )}
-        {levelUp && <LevelUpModal level={levelUp} items={equipped} onClose={() => setLevelUp(null)} />}
+        {levelUp && (
+          <LevelUpModal level={levelUp.level} rewardGrade={levelUp.rewardGrade} partnerName={partnerName} items={equipped} onClose={() => setLevelUp(null)} />
+        )}
+        {hatching && (
+          <HatchOverlay egg={hatching.egg} result={hatching.result} onPartner={() => finishHatch(true)} onClose={() => finishHatch(false)} />
+        )}
       </div>
     </div>
+    </PartnerContext.Provider>
   )
 }

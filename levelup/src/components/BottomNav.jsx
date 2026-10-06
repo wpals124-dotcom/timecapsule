@@ -1,9 +1,9 @@
 export const TABS = [
   { id: 'home', icon: '🏠', label: '홈' },
   { id: 'missions', icon: '🎯', label: '미션' },
+  { id: 'eggs', icon: '🥚', label: '부화장' },
   { id: 'league', icon: '🏆', label: '리그' },
   { id: 'shop', icon: '🛍️', label: '상점' },
-  { id: 'profile', icon: '👤', label: '프로필' },
 ]
 
 export default function BottomNav({ tab, onChange }) {

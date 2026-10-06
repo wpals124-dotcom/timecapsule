@@ -4,7 +4,7 @@ import Mascot from './Mascot.jsx'
 import StatRadar from './StatRadar.jsx'
 import { titleOf } from '../data/dummy.js'
 
-export default function ProfileScreen({ user, stats, profile, achievements, missions, equipped, leagueName, character }) {
+export default function ProfileScreen({ user, stats, profile, achievements, missions, equipped, leagueName, character, partnerName, collection }) {
   const todayPhotos = missions.filter((m) => m.done && m.photo)
   return (
     <div className="flex h-full flex-col bg-white">
@@ -19,6 +19,7 @@ export default function ProfileScreen({ user, stats, profile, achievements, miss
             </p>
             <p className="mt-0.5 text-xs font-bold text-duo-mute">🗓️ {profile.joined}</p>
             <div className="mt-2 flex gap-2 text-xs font-black">
+              <span className="rounded-lg bg-duo-greenLight px-2 py-1 text-duo-greenDark">도감 {collection}</span>
               <span className="rounded-lg bg-duo-blueLight px-2 py-1 text-duo-blue">팔로잉 12</span>
               <span className="rounded-lg bg-duo-blueLight px-2 py-1 text-duo-blue">팔로워 9</span>
             </div>
@@ -42,7 +43,7 @@ export default function ProfileScreen({ user, stats, profile, achievements, miss
           </div>
 
           {/* 능력치 삼각형 */}
-          <SectionTitle right={<span className="text-xs font-extrabold text-duo-mute">미션 인증으로 성장</span>}>{character.name}의 능력치</SectionTitle>
+          <SectionTitle right={<span className="text-xs font-extrabold text-duo-mute">미션 인증으로 성장</span>}>{partnerName}의 능력치</SectionTitle>
           <div className="card flex items-center gap-2 p-3">
             <StatRadar stats={character.stats} size={190} />
             <ul className="flex-1 space-y-2 text-xs font-bold text-duo-sub">

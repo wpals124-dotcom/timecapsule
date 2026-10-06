@@ -16,7 +16,7 @@ export const user = {
 export const character = {
   name: '레오',
   stats: { 체력: 42, 지식: 58, 마음: 35 },
-  lines: ['오늘도 같이 성장하자!', '미션 하나만 더 해볼까?', '꾸준함이 최고의 무기야!', '꼬리에 영양 가득 채우는 중! 🦎'],
+  lines: ['오늘도 같이 성장하자!', '미션 하나만 더 해볼까?', '꾸준함이 최고의 무기야!', '알이 점점 따뜻해지고 있어! 🥚'],
 }
 
 // stat: 미션 인증 시 오르는 캐릭터 능력치
@@ -78,9 +78,11 @@ export const league = {
 export const shopItems = [
   { id: 'boost', type: 'consumable', name: 'XP 부스트', desc: '다음 미션 경험치 2배', price: 150, emoji: '⚡' },
   { id: 'freeze', type: 'consumable', name: '스트릭 프리즈', desc: '하루 쉬어도 연속 기록 유지', price: 200, emoji: '🧊' },
-  { id: 'cap', type: 'wear', name: '빨간 모자', desc: '레오 전용 꾸미기', price: 300, emoji: '🧢' },
-  { id: 'glasses', type: 'wear', name: '선글라스', desc: '레오 전용 꾸미기', price: 400, emoji: '🕶️' },
-  { id: 'bow', type: 'wear', name: '리본', desc: '레오 전용 꾸미기', price: 250, emoji: '🎀' },
+  { id: 'egg-common', type: 'egg', grade: 'common', name: '일반 알', desc: '100 XP로 부화', price: 300, emoji: '🥚' },
+  { id: 'egg-rare', type: 'egg', grade: 'rare', name: '희귀 알', desc: '200 XP로 부화', price: 800, emoji: '🥚' },
+  { id: 'cap', type: 'wear', name: '빨간 모자', desc: '모든 친구 공용 꾸미기', price: 300, emoji: '🧢' },
+  { id: 'glasses', type: 'wear', name: '선글라스', desc: '모든 친구 공용 꾸미기', price: 400, emoji: '🕶️' },
+  { id: 'bow', type: 'wear', name: '리본', desc: '모든 친구 공용 꾸미기', price: 250, emoji: '🎀' },
 ]
 
 // ---- 프로필 탭 ----
