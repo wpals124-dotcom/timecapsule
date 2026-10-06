@@ -1,0 +1,61 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ['./index.html', './src/**/*.{js,jsx}'],
+  theme: {
+    extend: {
+      colors: {
+        duo: {
+          green: '#58CC02', greenDark: '#58A700', greenLight: '#D7FFB8', lime: '#89E219',
+          blue: '#1CB0F6', blueDark: '#1899D6', blueLight: '#DDF4FF',
+          yellow: '#FFC800', yellowDark: '#E5A000', orange: '#FF9600',
+          red: '#FF4B4B', redDark: '#EA2B2B', purple: '#CE82FF',
+          text: '#4B4B4B', sub: '#777777', mute: '#AFAFAF', line: '#E5E5E5', bg: '#F7F7F7',
+        },
+      },
+      fontFamily: { sans: ['Nunito', 'Noto Sans KR', 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'sans-serif'] },
+      keyframes: {
+        float: { '0%,100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-14px)' } },
+        shadow: { '0%,100%': { transform: 'scaleX(1)', opacity: '.25' }, '50%': { transform: 'scaleX(.75)', opacity: '.12' } },
+        pop: { '0%': { transform: 'scale(.6)', opacity: '0' }, '60%': { transform: 'scale(1.08)', opacity: '1' }, '100%': { transform: 'scale(1)' } },
+        rise: { '0%': { transform: 'translateY(0)', opacity: '1' }, '100%': { transform: 'translateY(-40px)', opacity: '0' } },
+        flicker: {
+          '0%,100%': { transform: 'scale(1,1) skewX(0)' },
+          '25%': { transform: 'scale(1.05,.95) skewX(3deg)' },
+          '50%': { transform: 'scale(.96,1.06) skewX(-3deg)' },
+          '75%': { transform: 'scale(1.03,.97) skewX(1deg)' },
+        },
+        ember: {
+          '0%': { transform: 'translate(0,0) scale(1)', opacity: '0' },
+          '15%': { opacity: '1' },
+          '100%': { transform: 'translate(var(--dx,0px),-46px) scale(.2)', opacity: '0' },
+        },
+        ignite: { '0%': { transform: 'scale(0)', opacity: '0' }, '60%': { transform: 'scale(1.25)', opacity: '1' }, '100%': { transform: 'scale(1)' } },
+        wobble: { '0%,100%': { transform: 'rotate(0)' }, '20%': { transform: 'rotate(-8deg)' }, '40%': { transform: 'rotate(7deg)' }, '60%': { transform: 'rotate(-5deg)' }, '80%': { transform: 'rotate(3deg)' } },
+        jump: { '0%': { transform: 'translateY(0) scale(1)' }, '40%': { transform: 'translateY(-60px) scale(1.05,.95)' }, '100%': { transform: 'translateY(-10px) scale(.2)', opacity: '0' } },
+        drift: { '0%,100%': { transform: 'translateY(0) rotate(0)' }, '50%': { transform: 'translateY(-12px) rotate(8deg)' } },
+        pulseRing: { '0%': { transform: 'scale(.9)', opacity: '.7' }, '100%': { transform: 'scale(1.35)', opacity: '0' } },
+        bob: { '0%,100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-6px)' } },
+        sheet: { '0%': { transform: 'translateY(100%)' }, '100%': { transform: 'translateY(0)' } },
+        fadeUp: { '0%': { transform: 'translateY(16px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
+      },
+      animation: {
+        float: 'float 3s ease-in-out infinite',
+        shadow: 'shadow 3s ease-in-out infinite',
+        pop: 'pop .45s ease-out both',
+        rise: 'rise 1.2s ease-out forwards',
+        flicker: 'flicker .9s ease-in-out infinite',
+        flickerFast: 'flicker .55s ease-in-out infinite',
+        ember: 'ember 1.4s ease-out infinite',
+        ignite: 'ignite .6s ease-out both',
+        wobble: 'wobble 1s ease-in-out infinite',
+        jump: 'jump .55s ease-in forwards',
+        drift: 'drift 4s ease-in-out infinite',
+        pulseRing: 'pulseRing 1.6s ease-out infinite',
+        bob: 'bob 1.6s ease-in-out infinite',
+        sheet: 'sheet .3s ease-out both',
+        fadeUp: 'fadeUp .5s ease-out both',
+      },
+    },
+  },
+  plugins: [],
+}

@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root { height: 100%; }
+body { -webkit-tap-highlight-color: transparent; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+
+body { color: #4B4B4B; font-weight: 700; background: #F7F7F7; }
+
+@layer components {
+  /* Duolingo식 3D 버튼: 아래 테두리로 두께감, 누르면 내려앉음 */
+  .btn {
+    @apply flex items-center justify-center rounded-2xl border-b-4 px-4 py-3.5 text-[15px] font-extrabold uppercase tracking-wide transition-all active:translate-y-[3px] active:border-b-[1px] disabled:pointer-events-none;
+  }
+  .btn-green { @apply btn border-duo-greenDark bg-duo-green text-white; }
+  .btn-blue { @apply btn border-duo-blueDark bg-duo-blue text-white; }
+  .btn-red { @apply btn border-duo-redDark bg-duo-red text-white; }
+  .btn-white { @apply btn border-2 border-b-4 border-duo-line bg-white text-duo-blue; }
+  .btn-disabled { @apply btn border-[#E5E5E5] bg-[#E5E5E5] text-duo-mute; }
+  .card { @apply rounded-2xl border-2 border-b-4 border-duo-line bg-white; }
+}
