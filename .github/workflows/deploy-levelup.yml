@@ -1,11 +1,10 @@
-# 레벨업 앱을 GitHub Pages에 배포한다.
+# 타임캡슐(루트 index.html)과 레벨업 앱(/levelup/)을 함께 GitHub Pages에 배포한다.
 # 처음 한 번: 저장소 Settings → Pages → Source를 "GitHub Actions"로 설정
-name: Deploy 레벨업 to GitHub Pages
+name: Deploy site to GitHub Pages
 
 on:
   push:
     branches: [main]
-    paths: ['levelup/**', '.github/workflows/deploy-levelup.yml']
   workflow_dispatch:
 
 permissions:
@@ -35,9 +34,16 @@ jobs:
           cache-dependency-path: levelup/package-lock.json
       - run: npm ci
       - run: npm run build
+      # 사이트 구성: / = 타임캡슐, /levelup/ = 레벨업 앱
+      - name: Assemble site
+        working-directory: .
+        run: |
+          mkdir -p _site/levelup
+          cp index.html _site/
+          cp -r levelup/dist/. _site/levelup/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: levelup/dist
+          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4
